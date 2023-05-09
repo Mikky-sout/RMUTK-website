@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request ,session ,redirect ,url_for
-from firebase import firebase
+from firebase import Firebase
 from flask_mail import Mail, Message
 from flask_session import Session
 
@@ -11,9 +11,7 @@ from os import path
 import pandas as pd
 import datetime
 import functools
-#import requests_toolbelt
-#import numpy as np
-#from acebook_scraper import get_posts
+
 import os.path
 
 
@@ -37,7 +35,7 @@ mail_settings = {
     "MAIL_PASSWORD": 'uuwotjazgrcfzvgo'
 }
 
-firebase = firebase(config)
+firebase = Firebase(config)
 db = firebase.database()
 storage = firebase.storage()
 app = Flask(__name__)
