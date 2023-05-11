@@ -2507,3 +2507,19 @@ img {vertical-align: middle;}
     color: var(--white);
 }
 
+.new {
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    background-color: red;
+    margin: 17px -3px;
+    padding: 4px 26px 6px 27px;
+    border-radius: 34px 10px;
+    }
+
+.post {
+    height: 30px;
+    left: 42px;
+    top: 195px;
+    position: absolute;
+}

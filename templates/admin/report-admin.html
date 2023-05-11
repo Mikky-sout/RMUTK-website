@@ -52,14 +52,8 @@
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
 
-              {% if by != '' %}
-              <h2 class="br">โดย {{by}}</h2>
-              <input type="button" class="nav-link btn btn-sm btn-primary" onclick="location.href='/interact-admin.html';" value="แสดงกระทู้ทั้งหมด"/>
-              {% else %}
-              <input type="button" class="nav-link btn btn-sm btn-primary" onclick="location.href='/interact-admin.html/{{my_id}}';" value="แสดงกระทู้ของฉัน"/>
-              {% endif %}
-          <a class="br nav-link btn btn-sm btn1 " href="/report-admin.html">รายงานกระทู้</a>
-          <a href="add-interact-admin.html" class=" nav-link btn btn-sm btn-primary ">เพิ่มข้อมูล</a>
+
+          <a href="/interact-admin.html" class="br nav-link btn btn-sm btn1 ">หน้ากระทู้</a>
         </nav>
         {% for thread in data %}
         {% if thread.id != 't000' %}
@@ -75,18 +69,10 @@
             {% endif %}
           </div>
           </div>
-                {% if thread.id != 't000' %}
-                  {% if my_id == thread.owner %}
-                  <div align="right">
-                      <a><input type="button" class=" btn btn-sm btn-primary" onclick="location.href='/edit-interact-admin.html/{{thread.id}}';" value="แก้ไขข้อมูล" /></a>
-                      <a><input type="button" class=" btn btn-sm btn1" onclick="location.href='/delete_interact/{{thread.id}}';" value="ลบกระทู้" /></a>
-                    </div>
-                  {% else %}
-                  <div align="right">
-                      <a><input type="button" class=" btn btn-sm btn1" onclick="location.href='/delete_interact/{{thread.id}}';"  value="ลบกระทู้" /></a>
 
-                    </div>
-                      {% endif %}
+                {% if thread.id != 't000' %}
+                  <input type="button" style="padding: 3.5px 9px; right: -916px;" class="a1 btn btn-primary" onclick="location.href=" value="ปิดใช้งาน" />
+                <input type="button" style="padding: 2.5px 9px;bottom: 98px;" class="a2 nav-link btn btn-security" style="padding: 5px 10px" onclick="location.href='/delete_interact/{{thread.id}}';" value="ลบกระทู้" />
             {% endif %}
                 {% endfor %}
         </div>

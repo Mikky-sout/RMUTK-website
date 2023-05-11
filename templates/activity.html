@@ -65,6 +65,10 @@
               </div>
               </div>
                   <div onclick="location.href='/activity-details-admin.html/{{event.id}}'" class="course">
+                      {% if event.EventNew == "New" %}
+                            <a class="new" style="color:white;">{{event.EventNew}}</a>
+                            {% else %}
+                            {% endif %}
                     <div class="row">
                       <div class="col-md-8">
                         <div class="card-block">

@@ -96,45 +96,50 @@
 
                   </div>
           {% endif %}
+
                 <div onclick="location.href='/publish-details-admin.html/{{news.id}}'" class="course">
+                    {% if news.NewsNew == "New" %}
+                            <a class="new" style="color:white;">{{news.NewsNew}}</a>
+                            {% else %}
+                            {% endif %}
                     <div class="row">
                         <div class="col-md-8">
                             <div class="card-block">
                                 <div class="name">
-                                    {% if news.type == "โพส" %}
-                                     <img class="d-block " src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" title="โพสแล้ว" style="height:30px" ><h2>{{news.title}}</h2>
-                                    {% else %}
-                                    <img class="d-block " src="https://cdn2.iconfinder.com/data/icons/web-and-apps-interface/32/Cancel-512.png" title="ยังไม่โพส" style="height:30px"><h2>{{news.title}}</h2>
-                                    {% endif %}
+                                    <h2>{{news.title}}</h2>
                                 </div>
+                    {% if news.type == "โพส" %}
+          <img class="post d-block " src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" title="โพสแล้ว" style="height:30px" >
+            {% else %}
+           <img class="post d-block " src="https://cdn2.iconfinder.com/data/icons/web-and-apps-interface/32/Cancel-512.png" title="ยังไม่โพส" style="height:30px">
+            {% endif %}
 
+                    {% endif %}
 
-                {% endif %}
-
-                {% if news.id != "n000" %}
-                    <p class="text">
-                      {% for i in range(news.length) %}
-                        {% if i < news.length %}
-                          {{news.detail[i]}}<br>
-                        {% else %}
-                          {{news.detail[i]}}
+                    {% if news.id != "n000" %}
+                        <p class="text">
+                          {% for i in range(news.length) %}
+                            {% if i < news.length %}
+                              {{news.detail[i]}}<br>
+                            {% else %}
+                              {{news.detail[i]}}
+                            {% endif %}
+                          {% endfor %}</p>
                         {% endif %}
-                      {% endfor %}</p>
+                        {% if news.id != "n000" %}
+                            <div style="position: absolute;bottom: 10px; font-size: 12px;">คณะ {{news.group}} <br> สร้างเมื่อ {{news.date}}<br>เวลา {{news.time}}</div>
+
+
+                            </div>
                     {% endif %}
                     {% if news.id != "n000" %}
-                        <div style="position: absolute;bottom: 10px; font-size: 12px;">คณะ {{news.group}} <br> สร้างเมื่อ {{news.date}}<br>เวลา {{news.time}}</div>
-
-
-                        </div>
-                {% endif %}
-                {% if news.id != "n000" %}
-                      </div>
-                      <div class="col-lg-4 content-item" style="width: 300px;margin: 1px auto;">
-                          <div class="pic">
-                            <img class="d-block" src="{{news.image}}" alt="" style="height:300px">
                           </div>
-                      </div>
-                    </div>
+                          <div class="col-lg-4 content-item" style="width: 300px;margin: 1px auto;">
+                              <div class="pic">
+                                <img class="d-block" src="{{news.image}}" alt="" style="height:300px">
+                              </div>
+                          </div>
+                        </div>
                 </div>
            {% endif %}
 

@@ -102,7 +102,7 @@ def login():
             password = request.form.get('pass')
             if id in allUser:
                 user = allUser[id]
-                if password == user['password']:
+                if password == user['password'] and str(user['isOn']) == "1":
                     if user['status'] == 0:
                         session['id'] = id ##เก็บค่าsession
                         session['name'] = user['name']
@@ -123,10 +123,12 @@ def login():
                         session['branch'] = user['branch']
                         session['isOn'] = user['isOn']
                         return redirect(url_for('index_admin'))
+                elif password == user['password'] and str(user['isOn']) == "0":
+                    return render_template('login.html', error='ผู้ใช้ถูกปิดการใช้งาน')
                 else:
                     return render_template('login.html', error='รหัสผ่าน ไม่ถูกต้อง')
             else:
-                return render_template('login.html',error='ไม่พบผู้ใช้')
+                return render_template('login.html',error='ไม่พบผู้ใช้งาน')
 
     session['id'] = None
     session['name'] = None
@@ -173,6 +175,8 @@ def index():
 def activity():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -183,6 +187,12 @@ def activity():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
@@ -197,7 +207,7 @@ def activity():
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
                                 'image': img, 'group': foundEvent['group'],
                                 'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour, 'type': type}
+                                'time': foundEvent['time'], 'isYour': isYour, 'type': type,'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id':'e000','title':'ยังไม่มีข่าวกิจกรรม','detail':''}
@@ -213,6 +223,8 @@ def activity():
 def activity_utk2():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -223,6 +235,12 @@ def activity_utk2():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
@@ -234,10 +252,9 @@ def activity_utk2():
                         isUr = 1
                     else:
                         isUr = 0
-                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'],
-                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour, 'type': type}
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],'image': img, 'group': foundEvent['group'],
+                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],'time': foundEvent['time'], 'isYour': isYour,
+                                'type': type,'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id':'e000','title':'ยังไม่มีข่าวกิจกรรม','detail':''}
@@ -268,6 +285,8 @@ def add_interact():
 def publish_admin():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -278,6 +297,12 @@ def publish_admin():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -291,7 +316,7 @@ def publish_admin():
                         isUr = 0
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                                 'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
-                                'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,'type': type}
+                                'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,'type': type,'NewsNew':NewsNew}
                     data.append(newsDict)
     else:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
@@ -308,6 +333,8 @@ def publish_admin():
 def publish_admin_custom():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -318,6 +345,12 @@ def publish_admin_custom():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" +i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -330,7 +363,7 @@ def publish_admin_custom():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],  'image':img,'group':foundNews['group'],
-                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type}
+                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type,'NewsNew':NewsNew}
                     data.append(newsDict)
 
     else:
@@ -347,6 +380,8 @@ def publish_admin_custom():
 def publish_admin_closed():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -357,6 +392,12 @@ def publish_admin_closed():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" +i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -369,7 +410,7 @@ def publish_admin_closed():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],  'image':img,'group':foundNews['group'],
-                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type}
+                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type,'NewsNew':NewsNew}
                     data.append(newsDict)
 
 
@@ -388,6 +429,8 @@ def publish_admin_closed():
 def publish_admin_2():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -398,6 +441,12 @@ def publish_admin_2():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -411,7 +460,7 @@ def publish_admin_2():
                         isUr = 0
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                                 'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
-                                'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,'type': type}
+                                'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,'type': type,'NewsNew':NewsNew}
                     data.append(newsDict)
     else:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
@@ -428,6 +477,8 @@ def publish_admin_2():
 def publish_admin_custom2():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -439,7 +490,12 @@ def publish_admin_custom2():
                             type = 'โพส'
                         else:
                             type = 'ไม่โพส'
-
+                        dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                        dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                        if dwa.days <= 7:
+                            NewsNew = "New"
+                        else:
+                            NewsNew = ""
                         detail = foundNews['detail'].split('\r\n')
                         img = storage.child("news/" +i).get_url(None)
                         dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -452,7 +508,7 @@ def publish_admin_custom2():
                         else:
                             isUr = 0
                         newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],  'image':img,'group':foundNews['group'],
-                                    'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type}
+                                    'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type,'NewsNew':NewsNew}
                         data.append(newsDict)
 
     else:
@@ -469,6 +525,8 @@ def publish_admin_custom2():
 def publish_admin_closed2():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -479,6 +537,12 @@ def publish_admin_closed2():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" +i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -491,7 +555,7 @@ def publish_admin_closed2():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],  'image':img,'group':foundNews['group'],
-                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type}
+                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundNews['date'],'time':foundNews['time'],'isYour':isYour,'type':type,'NewsNew':NewsNew}
                     data.append(newsDict)
 
 
@@ -660,10 +724,18 @@ def add_reply():
         # db.child('Thread').child(tid).child('Reply').push({'owner':session['id'],'name':session['name'],'group':session['branch'],
         #                                                    'email':session['email'],'detail':request.form.get('detail'),'date':date,'time':time})
 
-        newReply = {'owner': session['id'], 'name': session['name'], 'group': session['branch'],'email': session['email'], 'detail': request.form.get('detail'), 'date': date, 'time': time}
+        newReply = {'owner': session['id'], 'name': session['name'], 'group': session['branch'],'email': session['email'],
+                    'detail': request.form.get('detail'), 'date': date, 'time': time}
         db.child('Thread').child(tid).child("Reply").child("r"+rid).set(newReply)
 
         return redirect(url_for('interact_details',id=tid))
+
+@app.route('/add_reply',methods=['POST'])
+def add_report():
+    if request.method == 'POST':
+        tid = request.form.get('id')
+        date, time,_ = getDateTime()
+        rid =
 
 # ข้อมูลผู้ใช้
 @app.route('/profile.html')
@@ -780,6 +852,8 @@ def publish():
 def publish_custom_utk():
     autoDelete()
     allNews = db.child('News').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allNews is None:
         for i in allNews:
@@ -790,6 +864,12 @@ def publish_custom_utk():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundNews['date'],"%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year,dw.month,dw.day)
+                    if dwa.days <= 7 :
+                        NewsNew = "New"
+                    else:
+                        NewsNew = ""
                     detail = foundNews['detail'].split('\r\n')
                     img = storage.child("news/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -804,7 +884,7 @@ def publish_custom_utk():
                     newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                                 'image': img, 'group': foundNews['group'],
                                 'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundNews['date'],
-                                'time': foundNews['time'], 'isYour': isYour, 'type': type}
+                                'time': foundNews['time'], 'isYour': isYour, 'type': type, 'NewsNew':NewsNew}
                     data.append(newsDict)
     else:
         newDict = {'id':'n000','title':'ยังไม่มีข่าวประชาสัมพันธ์','detail':''}
@@ -859,6 +939,8 @@ def index_admin():
 def activity_admin():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -870,6 +952,12 @@ def activity_admin():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     date = 'สร้างเมื่อ ' + foundEvent['date']
@@ -883,7 +971,8 @@ def activity_admin():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail,'length':len(detail),'owner':foundEvent['owner'], 'group':foundEvent['group'],
-                                'isUr':isUr,'isYour':isYour ,'date' : date ,'time':time, 'image':img,'date':foundEvent['date'],'time':foundEvent['time'],'type':type}
+                                'isUr':isUr,'isYour':isYour ,'date' : date ,'time':time, 'image':img,'date':foundEvent['date'],'time':foundEvent['time'],'type':type,
+                                'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id':'e000','title':'ยังไม่มีข่าวกิจกรรม','detail':''}
@@ -899,6 +988,8 @@ def activity_admin():
 def activity_admin_custom():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -909,6 +1000,12 @@ def activity_admin_custom():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     date = 'สร้างเมื่อ ' + foundEvent['date']
@@ -922,7 +1019,7 @@ def activity_admin_custom():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail,'length':len(detail),'owner':foundEvent['owner'], 'group':foundEvent['group'],'isUr':isUr,
-                                'isYour':isYour ,'date' : date ,'time':time, 'image':img,'date':foundEvent['date'],'time':foundEvent['time'],'type':type}
+                                'isYour':isYour ,'date' : date ,'time':time, 'image':img,'date':foundEvent['date'],'time':foundEvent['time'],'type':type,'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id':'e000','title':'ยังไม่มีข่าวกิจกรรม','detail':''}
@@ -938,6 +1035,8 @@ def activity_admin_custom():
 def activity_admin_2():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -948,6 +1047,12 @@ def activity_admin_2():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
@@ -961,7 +1066,7 @@ def activity_admin_2():
                         isUr = 0
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
                                 'image': img, 'group': foundEvent['group'], 'isUr': isUr, 'length': len(detail),
-                                'datetime': dt, 'date': foundEvent['date'], 'time': foundEvent['time'], 'isYour': isYour,'type': type}
+                                'datetime': dt, 'date': foundEvent['date'], 'time': foundEvent['time'], 'isYour': isYour,'type': type,'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
@@ -978,6 +1083,8 @@ def activity_admin_2():
 def activity_admin_custom2():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -988,6 +1095,12 @@ def activity_admin_custom2():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" +i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
@@ -1000,7 +1113,7 @@ def activity_admin_custom2():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],  'image':img,'group':foundEvent['group'],
-                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundEvent['date'],'time':foundEvent['time'],'isYour':isYour,'type':type}
+                                'isUr':isUr,'length': len(detail), 'datetime': dt,'date':foundEvent['date'],'time':foundEvent['time'],'isYour':isYour,'type':type,'EventNew':EventNew}
                     data.append(newsDict)
 
     else:
@@ -1017,6 +1130,8 @@ def activity_admin_custom2():
 def activity_admin_closed():
     autoDelete()
     allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
     data = []
     if not allEvent is None:
         for i in allEvent:
@@ -1027,6 +1142,12 @@ def activity_admin_closed():
                         type = 'โพส'
                     else:
                         type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
                     detail = foundEvent['detail'].split('\r\n')
                     img = storage.child("event/" + i).get_url(None)
                     dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
@@ -1039,9 +1160,8 @@ def activity_admin_closed():
                     else:
                         isUr = 0
                     newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'],
-                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour, 'type': type}
+                                'image': img, 'group': foundEvent['group'],'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
+                                'time': foundEvent['time'], 'isYour': isYour, 'type': type,'EventNew':EventNew}
                     data.append(newsDict)
     else:
         newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
@@ -1188,6 +1308,46 @@ def interact_admin_custom(id:str):
         newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
     return render_template('./admin/interact-admin.html', data=data,by=session['name'])
+
+@app.route('/report-admin.html')
+def report_admin():
+    allThread = db.child('Thread').get().val()
+    bword = db.child('BWord').get().val()
+    data = []
+    if not allThread is None:
+        for i in allThread:
+            foundThread = db.child('Thread').child(i).get().val()
+            detail = functools.reduce(
+                lambda a, b:
+                    a.replace(b["Keyword"], b["Replace"])
+                , bword
+                , foundThread['detail']
+            )
+            detail = detail.split('\r\n')
+            img = storage.child("thread/" +i).get_url(None)
+            title = functools.reduce(
+                lambda a, b:
+                a.replace(b["Keyword"], b["Replace"])
+                , bword
+                , foundThread['title']
+            )
+            dt = 'สร้างเมื่อ ' + foundThread['date'] + ' ' + foundThread['time']
+            if foundThread['owner'] == session['id']:
+                isYour = 1
+            else:
+                isYour =0
+            newsDict = {'id': i, 'title': title, 'detail': detail, 'owner': foundThread['owner'],'length': len(detail),'image':img, 'datetime': dt,
+                        'date':foundThread['date'],'time':foundThread['time'],'isYour':isYour}
+            data.append(newsDict)
+    else:
+        newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == [] :
+        newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
+        data.append(newDict)
+    return render_template('./admin/report-admin.html', data=data, by='', length=len(data), my_id=session['id'])
 
 @app.route('/edit-activity-admin.html/<string:id>')
 def edit_activity_admin(id:str):
