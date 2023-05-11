@@ -72,7 +72,7 @@
 
                 {% if thread.id != 't000' %}
                   <input type="button" style="padding: 3.5px 9px; right: -916px;" class="a1 btn btn-primary" onclick="location.href=" value="ปิดใช้งาน" />
-                <input type="button" style="padding: 2.5px 9px;bottom: 98px;" class="a2 nav-link btn btn-security" style="padding: 5px 10px" onclick="location.href='/delete_interact/{{thread.id}}';" value="ลบกระทู้" />
+                <input type="button" style="padding: 2.5px 9px;bottom: 98px;" class="a2 nav-link btn btn-security" style="padding: 5px 10px" onclick="location.href='/delete_report/{{thread.id}},{{thread.tid}}';" value="ลบกระทู้" />
             {% endif %}
                 {% endfor %}
         </div>
