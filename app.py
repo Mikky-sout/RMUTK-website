@@ -778,6 +778,7 @@ def add_report():
         date, time,_ = getDateTime()
         rid = autogen_report()
 
+
         data = {'date':date,'time':time,'rq':rq,'id':tid,'owner':session['id'],'title':title}
 
         db.child('Report').child(rid).set(data)
