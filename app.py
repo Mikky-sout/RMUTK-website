@@ -730,12 +730,12 @@ def add_reply():
 
         return redirect(url_for('interact_details',id=tid))
 
-@app.route('/add_reply',methods=['POST'])
-def add_report():
-    if request.method == 'POST':
-        tid = request.form.get('id')
-        date, time,_ = getDateTime()
-        rid =
+# @app.route('/add_reply',methods=['POST'])
+# def add_report():
+#     if request.method == 'POST':
+#         tid = request.form.get('id')
+#         date, time,_ = getDateTime()
+#         rid =
 
 # ข้อมูลผู้ใช้
 @app.route('/profile.html')
