@@ -78,7 +78,11 @@
                 </div>
             </div>
             <div>
-               <input type="checkbox" id="checkbox" name="isOn" value="open">
+              {% if data.isOn == 1 %}
+               <input type="checkbox" id="checkbox" name="isOn" value="open" checked>
+              {% else %}
+              <input type="checkbox" id="checkbox" name="isOn" value="open" >
+              {% endif %}
               <label for="checkbox"> เปิดใช้งานข่าว</label>
                   </div>
 

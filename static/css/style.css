@@ -1567,14 +1567,7 @@ pre .copy-to-clipboard {
     }
 }
 
-@media screen and (max-width: 400px) {
-  .box55 {
-	text-align: center;
-    margin-top: -521px;
-    margin-left: 1137px;
-    position: absolute;
-    }
-}
+
 
   @media screen and (max-width: 450px) {
   .card1 {
@@ -1615,22 +1608,18 @@ pre .copy-to-clipboard {
   }
 
 
+.group{
+    background: #ff0082;
+    color: #fff;
+}
+
+.add{
+    background: #1578ef;
+    color: #fff;
+}
 .pro {
     display: flex;
     margin-left: 43px;
-}
-
-
-
-.button55 {
-	font-size: 1em;
-	padding: 8px 16px;
-	color: #fff;
-	text-decoration: none;
-	cursor: pointer;
-	transition: all 0.3s ease-out;
-	background: #403e3d;
-	border-radius: 50px;
 }
 
 .boardz {
@@ -2000,20 +1989,7 @@ font-family: 'Prompt', sans-serif;
     padding: 5 px 10px important
 }
 
-.box55,
-  .stats {
-  display: flex;
-  }
 
-  .box55 {
-  text-align: center;
-  margin-top: -521px;
-  margin-left: 1139px;
-  position: fixed;
-  transform-style: preserve-3d;
-  overflow: hidden;
-  width: 581px;
-  }
 
 .mar-top {
   margin-top: -17px;

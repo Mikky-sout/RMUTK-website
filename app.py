@@ -29,7 +29,7 @@ mail_settings = {
     "MAIL_USE_TLS": False,
     "MAIL_USE_SSL": True,
     "MAIL_USERNAME": 'modfer13@gmail.com',
-    "MAIL_PASSWORD": 'uuwotjazgrcfzvgo'
+    "MAIL_PASSWORD": 'vxfpccxfvujsonya'
 }
 
 firebase = Firebase(config)
@@ -154,7 +154,11 @@ def password():
         user = allUser[getid]
         if oldpass == user['password']:
             db.child('User').child(session['id']).update({'password': newpass})
-        return render_template('profile.html')
+        elif newpass != user['password'] :
+            return render_template('login.html', error='ผู้ใช้ถูกปิดการใช้งาน')
+        else:
+            return render_template('login.html', error='รหัสผ่าน ไม่ถูกต้อง')
+        return redirect(url_for('profile'))
 
 
 @app.route('/index.html')
@@ -170,117 +174,6 @@ def index():
                                url3=db.child('ImgeIndex').child('n003', 'url').get().val())
     elif session['status'] == 1:
         return redirect(url_for('index_admin'))
-
-
-# ข่าวกิจกรรม
-@app.route('/activity.html')
-def activity():
-    autoDelete()
-    allEvent = db.child('Event').get().val()
-    date, time, _ = getDateTime()
-    today = datetime.datetime.today()
-    data = []
-    if not allEvent is None:
-        for i in allEvent:
-            foundEvent = db.child('Event').child(i).get().val()
-            if foundEvent['group'] != "@มหาวิทยาลัย":
-                if "1" == str(foundEvent['isOn']):
-                    if "0" != str(foundEvent['isOn']):
-                        type = 'โพส'
-                    else:
-                        type = 'ไม่โพส'
-                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
-                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
-                    if dwa.days <= 7:
-                        EventNew = "New"
-                    else:
-                        EventNew = ""
-                    detail = foundEvent['detail'].split('\r\n')
-                    img = storage.child("event/" + i).get_url(None)
-                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                    if foundEvent['owner'] == session['id']:
-                        isYour = 1
-                    else:
-                        isYour = 0
-                    if foundEvent['group'] == session['branch']:
-                        isUr = 1
-                    else:
-                        isUr = 0
-                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'],
-                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour, 'type': type, 'EventNew': EventNew}
-                    data.append(newsDict)
-    else:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
-        data.append(newDict)
-    if len(data) > 1:
-        sort(data)
-    if data == []:
-        newDict = {'id': 'e00', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
-        data.append(newDict)
-    return render_template('activity.html', data=data, by='', my_id=session['id'], my_group=session['branch'])
-
-
-@app.route('/activity.html/utk2')
-def activity_utk2():
-    autoDelete()
-    allEvent = db.child('Event').get().val()
-    date, time, _ = getDateTime()
-    today = datetime.datetime.today()
-    data = []
-    if not allEvent is None:
-        for i in allEvent:
-            foundEvent = db.child('Event').child(i).get().val()
-            if foundEvent['group'] == "@มหาวิทยาลัย":
-                if "1" == str(foundEvent['isOn']):
-                    if "0" != str(foundEvent['isOn']):
-                        type = 'โพส'
-                    else:
-                        type = 'ไม่โพส'
-                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
-                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
-                    if dwa.days <= 7:
-                        EventNew = "New"
-                    else:
-                        EventNew = ""
-                    detail = foundEvent['detail'].split('\r\n')
-                    img = storage.child("event/" + i).get_url(None)
-                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                    if foundEvent['owner'] == session['id']:
-                        isYour = 1
-                    else:
-                        isYour = 0
-                    if foundEvent['group'] == session['branch']:
-                        isUr = 1
-                    else:
-                        isUr = 0
-                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'],
-                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour,
-                                'type': type, 'EventNew': EventNew}
-                    data.append(newsDict)
-    else:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
-        data.append(newDict)
-    if len(data) > 1:
-        sort(data)
-    if data == []:
-        newDict = {'id': 'e00', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
-        data.append(newDict)
-    return render_template('activity.html', data=data, by=session['id'])
-
-
-# รายละเอียดข่าวกิจกรรม
-@app.route('/activity-details.html/<string:id>')
-def activity_details(id: str):
-    foundEvent = db.child('Event').child(id).get().val()
-    detail = foundEvent['detail'].split('\r\n')
-    img = storage.child("event/" + id).get_url(None)
-    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img}
-    return render_template('./admin/activity-details.html', data=data)
-
 
 # หน้าหลักหระทู้
 @app.route('/add-interact.html')
@@ -341,7 +234,7 @@ def publish_admin():
                            my_group=session['branch'])
 
 
-@app.route('/publish-admin.html/rmutk')
+@app.route('/publish2-admin.html')
 def publish_admin_custom():
     autoDelete()
     allNews = db.child('News').get().val()
@@ -388,10 +281,10 @@ def publish_admin_custom():
     if data == []:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
         data.append(newDict)
-    return render_template('./admin/publish-admin.html', data=data, by=session['id'])
+    return render_template('./admin/publish2-admin.html', data=data, by=session['id'])
 
 
-@app.route('/publish-admin.html/closed')
+@app.route('/publish3-admin.html')
 def publish_admin_closed():
     autoDelete()
     allNews = db.child('News').get().val()
@@ -440,10 +333,10 @@ def publish_admin_closed():
         newDict = {'id': 'n000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
     print(data)
-    return render_template('./admin/publish-admin.html', data=data, by=session['id'])
+    return render_template('./admin/publish3-admin.html', data=data, by=session['id'])
 
 
-@app.route('/publish-admin.html/2')
+@app.route('/publishAD1-admin.html')
 def publish_admin_2():
     autoDelete()
     allNews = db.child('News').get().val()
@@ -454,33 +347,34 @@ def publish_admin_2():
         for i in allNews:
             foundNews = db.child('News').child(i).get().val()
             if foundNews['group'] != "@มหาวิทยาลัย":
-                if "0" != str(foundNews['isOn']):
-                    if "1" == str(foundNews['isOn']):
-                        type = 'โพส'
-                    else:
-                        type = 'ไม่โพส'
-                    dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
-                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
-                    if dwa.days <= 7:
-                        NewsNew = "New"
-                    else:
-                        NewsNew = ""
-                    detail = foundNews['detail'].split('\r\n')
-                    img = storage.child("news/" + i).get_url(None)
-                    dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
-                    if foundNews['owner'] == session['id']:
-                        isYour = 1
-                    else:
-                        isYour = 0
-                    if foundNews['group'] == session['branch']:
-                        isUr = 1
-                    else:
-                        isUr = 0
-                    newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
-                                'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
-                                'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
-                                'type': type, 'NewsNew': NewsNew}
-                    data.append(newsDict)
+                if session['id'] == "admin":
+                    if "0" != str(foundNews['isOn']):
+                        if "1" == str(foundNews['isOn']):
+                            type = 'โพส'
+                        else:
+                            type = 'ไม่โพส'
+                        dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                        dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                        if dwa.days <= 7:
+                            NewsNew = "New"
+                        else:
+                            NewsNew = ""
+                        detail = foundNews['detail'].split('\r\n')
+                        img = storage.child("news/" + i).get_url(None)
+                        dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                        if foundNews['owner'] == session['id']:
+                            isYour = 1
+                        else:
+                            isYour = 0
+                        if foundNews['group'] == session['branch']:
+                            isUr = 1
+                        else:
+                            isUr = 0
+                        newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                                    'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                                    'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                                    'type': type, 'NewsNew': NewsNew}
+                        data.append(newsDict)
     else:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
         data.append(newDict)
@@ -490,11 +384,11 @@ def publish_admin_2():
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
         data.append(newDict)
 
-    return render_template('./admin/publish-admin.html', data=data, by='', my_id=session['id'],
+    return render_template('./admin/publishAD1-admin.html', data=data, by='', my_id=session['id'],
                            my_group=session['branch'])
 
 
-@app.route('/publish-admin.html/rmutk2')
+@app.route('/publishAD2-admin.html')
 def publish_admin_custom2():
     autoDelete()
     allNews = db.child('News').get().val()
@@ -504,8 +398,8 @@ def publish_admin_custom2():
     if not allNews is None:
         for i in allNews:
             foundNews = db.child('News').child(i).get().val()
-            if foundNews['group'] == "@มหาวิทยาลัย":
-                if session['branch'] == 'admin':
+            if session['id'] == "admin":
+                if foundNews['group'] == "@มหาวิทยาลัย":
                     if "1" == str(foundNews['isOn']):
                         if "0" != str(foundNews['isOn']):
                             type = 'โพส'
@@ -542,10 +436,10 @@ def publish_admin_custom2():
     if data == []:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
         data.append(newDict)
-    return render_template('./admin/publish-admin.html', data=data, by=session['id'])
+    return render_template('./admin/publishAD2-admin.html', data=data, by="admin")
 
 
-@app.route('/publish-admin.html/closed2')
+@app.route('/publishAD3-admin.html')
 def publish_admin_closed2():
     autoDelete()
     allNews = db.child('News').get().val()
@@ -556,7 +450,7 @@ def publish_admin_closed2():
         for i in allNews:
             foundNews = db.child('News').child(i).get().val()
             if str(foundNews['isOn']) != "1":
-                if foundNews['group'] == session['branch'] or session['id'] == "admin":
+                if foundNews['group'] != "@มหาวิทยาลัย" or session['id'] == "admin":
                     if "0" != str(foundNews['isOn']):
                         type = 'โพส'
                     else:
@@ -593,7 +487,7 @@ def publish_admin_closed2():
     if data == []:
         newDict = {'id': 'n000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
-    return render_template('./admin/publish-admin.html', data=data, by=session['id'])
+    return render_template('./admin/publishAD3-admin.html', data=data, by=session['id'])
 
 
 # หน้ารายละเอียดข่าวแอดมิน
@@ -614,8 +508,7 @@ def add_publish_admin():
     data = []
     for i in BDl:
         data.append(i)
-    return render_template('./admin/add-publish-admin.html', data=data, my_group=session['branch'], my_id=session['id'],
-                           min=getNextDay())
+    return render_template('./admin/add-publish-admin.html', data=data, my_group=session['branch'], my_id=session['id'],min=getNextDay())
 
 
 # หน้าติดต่อ
@@ -669,7 +562,7 @@ def interact_details(id: str):
     )
     data = {'id': id, 'title': title, 'detail': display_detail, 'real_title':thread['title'],'real_detail':detail,'owner': thread['owner'], 'length': len(detail),
             'name': user['name'], 'email': user['email'], 'date': thread['date'], 'time': thread['time'], 'img2': img2}
-    return render_template('interact_details.html', data=data, reply=replyList)
+    return render_template('interact_details.html', data=data, reply=replyList,my_status=session['status'])
 
 
 # กระทู้
@@ -777,13 +670,15 @@ def add_report():
         rq = request.form.get('rq')
         date, time,_ = getDateTime()
         rid = autogen_report()
-
-
         data = {'date':date,'time':time,'rq':rq,'id':tid,'owner':session['id'],'title':title}
 
         db.child('Report').child(rid).set(data)
         # print(tid,title,rid)
-        return redirect(url_for('interact_details', id=tid))
+        if session['status'] == 0 :
+            return redirect(url_for('interact', id=tid))
+        else:
+            return redirect(url_for('interact_admin', id=tid))
+
 
 # ข้อมูลผู้ใช้
 @app.route('/profile.html')
@@ -863,7 +758,7 @@ def publish():
     if not allNews is None:
         for i in allNews:
             foundNews = db.child('News').child(i).get().val()
-            if foundNews['group'] != "@มหาวิทยาลัย":
+            if foundNews['group'] != "@มหาวิทยาลัย" or session['branch'] == foundNews['group']:
                 if "1" == str(foundNews['isOn']):
                     if "0" != str(foundNews['isOn']):
                         type = 'โพส'
@@ -902,8 +797,8 @@ def publish():
     return render_template('publish.html', data=data, by='', my_id=session['id'], my_group=session['branch'])
 
 
-@app.route('/publish.html/utk')
-def publish_custom_utk():
+@app.route('/publish2.html')
+def publish_custom_2():
     autoDelete()
     allNews = db.child('News').get().val()
     date, time, _ = getDateTime()
@@ -948,7 +843,7 @@ def publish_custom_utk():
     if data == []:
         newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
         data.append(newDict)
-    return render_template('publish.html', data=data, by=session['id'])
+    return render_template('publish2.html', data=data, by=session['id'])
 
 
 # รายละเอียดข่าว
@@ -961,6 +856,114 @@ def publish_detail(id: str):
 
     return render_template('publish-detail.html', data=data)
 
+# ข่าวกิจกรรม
+@app.route('/activity.html')
+def activity():
+    autoDelete()
+    allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
+    data = []
+    if not allEvent is None:
+        for i in allEvent:
+            foundEvent = db.child('Event').child(i).get().val()
+            if foundEvent['group'] != "@มหาวิทยาลัย" or session['branch'] == foundEvent['group']:
+                if "1" == str(foundEvent['isOn']):
+                    if "0" != str(foundEvent['isOn']):
+                        type = 'โพส'
+                    else:
+                        type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
+                    detail = foundEvent['detail'].split('\r\n')
+                    img = storage.child("event/" + i).get_url(None)
+                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                    if foundEvent['owner'] == session['id']:
+                        isYour = 1
+                    else:
+                        isYour = 0
+                    if foundEvent['group'] == session['branch']:
+                        isUr = 1
+                    else:
+                        isUr = 0
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
+                                'image': img, 'group': foundEvent['group'],
+                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
+                                'time': foundEvent['time'], 'isYour': isYour, 'type': type, 'EventNew': EventNew}
+                    data.append(newsDict)
+    else:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == []:
+        newDict = {'id': 'e00', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+        data.append(newDict)
+    return render_template('activity.html', data=data, by='', my_id=session['id'], my_group=session['branch'])
+
+
+@app.route('/activity2.html')
+def activity_2():
+    autoDelete()
+    allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
+    data = []
+    if not allEvent is None:
+        for i in allEvent:
+            foundEvent = db.child('Event').child(i).get().val()
+            if foundEvent['group'] == "@มหาวิทยาลัย":
+                if "1" == str(foundEvent['isOn']):
+                    if "0" != str(foundEvent['isOn']):
+                        type = 'โพส'
+                    else:
+                        type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
+                    detail = foundEvent['detail'].split('\r\n')
+                    img = storage.child("event/" + i).get_url(None)
+                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                    if foundEvent['owner'] == session['id']:
+                        isYour = 1
+                    else:
+                        isYour = 0
+                    if foundEvent['group'] == session['branch']:
+                        isUr = 1
+                    else:
+                        isUr = 0
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
+                                'image': img, 'group': foundEvent['group'],
+                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
+                                'time': foundEvent['time'], 'isYour': isYour,
+                                'type': type, 'EventNew': EventNew}
+                    data.append(newsDict)
+    else:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == []:
+        newDict = {'id': 'e00', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+        data.append(newDict)
+    return render_template('activity2.html', data=data, by=session['id'])
+
+
+# รายละเอียดข่าวกิจกรรม
+@app.route('/activity-details.html/<string:id>')
+def activity_details(id: str):
+    foundEvent = db.child('Event').child(id).get().val()
+    detail = foundEvent['detail'].split('\r\n')
+    img = storage.child("event/" + id).get_url(None)
+    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img}
+    return render_template('./admin/activity-details.html', data=data)
 
 # ส่วนการค้นหา
 @app.route('/search.html')
@@ -1048,7 +1051,7 @@ def activity_admin():
                            my_group=session['branch'])
 
 
-@app.route('/activity-admin.html/rmutk')
+@app.route('/activity2-admin.html')
 def activity_admin_custom():
     autoDelete()
     allEvent = db.child('Event').get().val()
@@ -1095,111 +1098,10 @@ def activity_admin_custom():
     if data == []:
         newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': '', 'group': ''}
         data.append(newDict)
-    return render_template('./admin/activity-admin.html', data=data, by=session['id'])
+    return render_template('./admin/activity2-admin.html', data=data, by=session['id'])
 
 
-@app.route('/activity-admin.html/2')
-def activity_admin_2():
-    autoDelete()
-    allEvent = db.child('Event').get().val()
-    date, time, _ = getDateTime()
-    today = datetime.datetime.today()
-    data = []
-    if not allEvent is None:
-        for i in allEvent:
-            foundEvent = db.child('Event').child(i).get().val()
-            if foundEvent['group'] != "@มหาวิทยาลัย":
-                if "0" != str(foundEvent['isOn']):
-                    if "1" == str(foundEvent['isOn']):
-                        type = 'โพส'
-                    else:
-                        type = 'ไม่โพส'
-                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
-                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
-                    if dwa.days <= 7:
-                        EventNew = "New"
-                    else:
-                        EventNew = ""
-                    detail = foundEvent['detail'].split('\r\n')
-                    img = storage.child("event/" + i).get_url(None)
-                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                    if foundEvent['owner'] == session['id']:
-                        isYour = 1
-                    else:
-                        isYour = 0
-                    if foundEvent['group'] == session['branch']:
-                        isUr = 1
-                    else:
-                        isUr = 0
-                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'], 'isUr': isUr, 'length': len(detail),
-                                'datetime': dt, 'date': foundEvent['date'], 'time': foundEvent['time'],
-                                'isYour': isYour, 'type': type, 'EventNew': EventNew}
-                    data.append(newsDict)
-    else:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
-        data.append(newDict)
-    if len(data) > 1:
-        sort(data)
-    if data == []:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
-        data.append(newDict)
-
-    return render_template('./admin/activity-admin.html', data=data, by='', my_id=session['id'],
-                           my_group=session['branch'])
-
-
-@app.route('/activity-admin.html/rmutk2')
-def activity_admin_custom2():
-    autoDelete()
-    allEvent = db.child('Event').get().val()
-    date, time, _ = getDateTime()
-    today = datetime.datetime.today()
-    data = []
-    if not allEvent is None:
-        for i in allEvent:
-            foundEvent = db.child('Event').child(i).get().val()
-            if foundEvent['group'] == "@มหาวิทยาลัย":
-                if "1" == str(foundEvent['isOn']):
-                    if "0" != str(foundEvent['isOn']):
-                        type = 'โพส'
-                    else:
-                        type = 'ไม่โพส'
-                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
-                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
-                    if dwa.days <= 7:
-                        EventNew = "New"
-                    else:
-                        EventNew = ""
-                    detail = foundEvent['detail'].split('\r\n')
-                    img = storage.child("event/" + i).get_url(None)
-                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                    if foundEvent['owner'] == session['id']:
-                        isYour = 1
-                    else:
-                        isYour = 0
-                    if foundEvent['group'] == session['branch']:
-                        isUr = 1
-                    else:
-                        isUr = 0
-                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
-                                'image': img, 'group': foundEvent['group'],
-                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
-                                'time': foundEvent['time'], 'isYour': isYour, 'type': type, 'EventNew': EventNew}
-                    data.append(newsDict)
-
-    else:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
-        data.append(newDict)
-    if len(data) > 1:
-        sort(data)
-    if data == []:
-        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
-        data.append(newDict)
-    return render_template('./admin/activity-admin.html', data=data, by=session['id'], my_group=session['branch'])
-
-
-@app.route('/activity-admin.html/closed')
+@app.route('/activity3-admin.html')
 def activity_admin_closed():
     autoDelete()
     allEvent = db.child('Event').get().val()
@@ -1246,7 +1148,156 @@ def activity_admin_closed():
         newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
     print(data)
-    return render_template('./admin/activity-admin.html', data=data, by=session['id'])
+    return render_template('./admin/activity3-admin.html', data=data, by=session['id'])
+
+@app.route('/activityAD1-admin.html')
+def activity_admin_2():
+    autoDelete()
+    allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
+    data = []
+    if not allEvent is None:
+        for i in allEvent:
+            foundEvent = db.child('Event').child(i).get().val()
+            if foundEvent['group'] != "@มหาวิทยาลัย":
+                if "0" != str(foundEvent['isOn']):
+                    if "1" == str(foundEvent['isOn']):
+                        type = 'โพส'
+                    else:
+                        type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
+                    detail = foundEvent['detail'].split('\r\n')
+                    img = storage.child("event/" + i).get_url(None)
+                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                    if foundEvent['owner'] == session['id']:
+                        isYour = 1
+                    else:
+                        isYour = 0
+                    if foundEvent['group'] == session['branch']:
+                        isUr = 1
+                    else:
+                        isUr = 0
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
+                                'image': img, 'group': foundEvent['group'], 'isUr': isUr, 'length': len(detail),
+                                'datetime': dt, 'date': foundEvent['date'], 'time': foundEvent['time'],
+                                'isYour': isYour, 'type': type, 'EventNew': EventNew}
+                    data.append(newsDict)
+    else:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == []:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวคณะ', 'detail': ''}
+        data.append(newDict)
+
+    return render_template('./admin/activityAD1-admin.html', data=data, by='', my_id=session['id'],my_group=session['branch'])
+
+
+@app.route('/activityAD2-admin.html')
+def activity_admin_custom2():
+    autoDelete()
+    allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
+    data = []
+    if not allEvent is None:
+        for i in allEvent:
+            foundEvent = db.child('Event').child(i).get().val()
+            if foundEvent['group'] == "@มหาวิทยาลัย":
+                if "1" == str(foundEvent['isOn']):
+                    if "0" != str(foundEvent['isOn']):
+                        type = 'โพส'
+                    else:
+                        type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
+                    detail = foundEvent['detail'].split('\r\n')
+                    img = storage.child("event/" + i).get_url(None)
+                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                    if foundEvent['owner'] == session['id']:
+                        isYour = 1
+                    else:
+                        isYour = 0
+                    if foundEvent['group'] == session['branch']:
+                        isUr = 1
+                    else:
+                        isUr = 0
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
+                                'image': img, 'group': foundEvent['group'],
+                                'isUr': isUr, 'length': len(detail), 'datetime': dt, 'date': foundEvent['date'],
+                                'time': foundEvent['time'], 'isYour': isYour, 'type': type, 'EventNew': EventNew}
+                    data.append(newsDict)
+
+    else:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == []:
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวมหาวิทยาลัย', 'detail': ''}
+        data.append(newDict)
+    return render_template('./admin/activityAD2-admin.html', data=data, by=session['id'], my_group=session['branch'])
+
+
+@app.route('/activityAD3-admin.html')
+def activity_admin_closed2():
+    autoDelete()
+    allEvent = db.child('Event').get().val()
+    date, time, _ = getDateTime()
+    today = datetime.datetime.today()
+    data = []
+    if not allEvent is None:
+        for i in allEvent:
+            foundEvent = db.child('Event').child(i).get().val()
+            if str(foundEvent['isOn']) != "1":
+                if foundEvent['group'] == session['branch'] or session['id'] == "admin":
+                    if "0" != str(foundEvent['isOn']):
+                        type = 'โพส'
+                    else:
+                        type = 'ไม่โพส'
+                    dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                    dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                    if dwa.days <= 7:
+                        EventNew = "New"
+                    else:
+                        EventNew = ""
+                    detail = foundEvent['detail'].split('\r\n')
+                    img = storage.child("event/" + i).get_url(None)
+                    dt = 'โพสเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                    if foundEvent['owner'] == session['id']:
+                        isYour = 1
+                    else:
+                        isYour = 0
+                    if foundEvent['group'] == session['branch']:
+                        isUr = 1
+                    else:
+                        isUr = 0
+                    newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'owner': foundEvent['owner'],
+                                'image': img, 'group': foundEvent['group'], 'isUr': isUr, 'length': len(detail),
+                                'datetime': dt, 'date': foundEvent['date'],
+                                'time': foundEvent['time'], 'isYour': isYour, 'type': type, 'EventNew': EventNew}
+                    data.append(newsDict)
+    else:
+        newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
+        data.append(newDict)
+    if len(data) > 1:
+        sort(data)
+    if data == []:
+        newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
+        data.append(newDict)
+    print(data)
+    return render_template('./admin/activityAD3-admin.html', data=data, by=session['id'])
 
 
 # รายละเอียดข่าวกิจกรรมแอดมิน
@@ -1351,12 +1402,23 @@ def interact_admin():
     else:
         newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
+    allReport = db.child('Report').get().val()
+    CoustReport = 0
+    if not allReport is None:
+        for i in allReport:
+            CoustReport += 1
+    else:
+        CoustReport = 0
+    if CoustReport == 0 :
+        CoustRp = ""
+    else:
+        CoustRp = CoustReport
     if len(data) > 1:
         sort(data)
     if data == []:
         newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
-    return render_template('./admin/interact-admin.html', data=data, by='', length=len(data), my_id=session['id'])
+    return render_template('./admin/interact-admin.html', data=data, by='', length=len(data), my_id=session['id'],CoustRp=CoustRp)
 
 
 # หน้าแสดงข้อมูลเฉพาะ
@@ -1389,6 +1451,7 @@ def interact_admin_custom(id: str):
     else:
         newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
+
     if len(data) > 1:
         sort(data)
     if data == []:
@@ -1399,42 +1462,27 @@ def interact_admin_custom(id: str):
 
 @app.route('/report-admin.html')
 def report_admin():
-    allThread = db.child('Report').get().val()
+    allTReport  = db.child('Report').get().val()
     bword = db.child('BWord').get().val()
     data = []
-    if not allThread is None:
-        for i in allThread:
-            foundThread = db.child('Report').child(i).get().val()
-            # detail = functools.reduce(
-            #     lambda a, b:
-            #         a.replace(b["Keyword"], b["Replace"])
-            #     , bword
-            #     , foundThread['detail']
-            # )
-            # detail = detail.split('\r\n')
-            # img = storage.child("thread/" +i).get_url(None)
-            # title = functools.reduce(
-            #     lambda a, b:
-            #     a.replace(b["Keyword"], b["Replace"])
-            #     , bword
-            #     , foundThread['title']
-            # )
-            dt = 'สร้างเมื่อ ' + foundThread['date'] + ' ' + foundThread['time']
-            if foundThread['owner'] == session['id']:
+    if not allTReport  is None:
+        for i in allTReport :
+            foundReport  = db.child('Report').child(i).get().val()
+            dt = 'สร้างเมื่อ ' + foundReport ['date'] + ' ' + foundReport['time']
+            if foundReport ['owner'] == session['id']:
                 isYour = 1
             else:
                 isYour = 0
-            newsDict = {'id': i, 'tid': foundThread['id'], 'title': foundThread['title'], 'detail': foundThread['rq'],
-                        'owner': foundThread['owner'], 'datetime': dt,
-                        'date': foundThread['date'], 'time': foundThread['time'], 'isYour': isYour}
+            newsDict = {'id': i, 'tid': foundReport ['id'], 'title': foundReport ['title'], 'detail': foundReport ['rq'],
+                        'owner': foundReport ['owner'], 'datetime': dt,'rq':foundReport ['rq'],'date': foundReport ['date'], 'time': foundReport ['time'], 'isYour': isYour}
             data.append(newsDict)
     else:
-        newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
+        newDict = {'id': 'rp000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
     if len(data) > 1:
         sort(data)
     if data == []:
-        newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
+        newDict = {'id': 'rp000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
     return render_template('./admin/report-admin.html', data=data, by='', length=len(data), my_id=session['id'])
 
@@ -1496,8 +1544,8 @@ def edit_user_admin(id: str):
     DBranch = []
     for i in BDl:
         DBranch.append(i)
-    return render_template('./admin/edit-user-admin.html', data=data, id=id, image=img, DBranch=DBranch,
-                           datatoken=datatoken, my_group=session['branch'], my_id=session['id'])
+    return render_template('./admin/edit-user-admin.html', data=data, id=id, image=img, DBranch=DBranch,datatoken=datatoken,
+                           my_group=session['branch'],my_id=session['id'],my_status=session['status'], my_name=session['name'])
 
 
 @app.route('/publish_search', methods=['POST'])
@@ -1509,11 +1557,10 @@ def publish_search():
         if not allNews is None:
             for i in allNews:
                 foundNews = db.child('News').child(i).get().val()
-                if foundNews['group'] != "@มหาวิทยาลัย":
-                    if "0" != str(foundNews['isOn']):
-                        isOn = "โพส"
-                    else:
-                        isOn = "ไม่โพส"
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
                 detail = foundNews['detail'].split('\r\n')
                 img = storage.child("news/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -1529,8 +1576,222 @@ def publish_search():
                             'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
                             'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
                             'isOn': isOn}
-                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0:
-                    data.append(newsDict)
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(word) >= 0:
+                    if str(foundNews['isOn']) == '1':
+                        if session['branch'] == foundNews['group']:
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publish_search_2', methods=['POST'])
+def publish_search_2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(word) >= 0:
+                    if str(foundNews['isOn']) == '1':
+                        if foundNews['group'] == "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publish_search_admin', methods=['POST'])
+def publish_search_admin():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(word) >= 0:
+                    if str(foundNews['isOn']) == '1':
+                        if foundNews['group'] == session['branch']:
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publish_search_admin2', methods=['POST'])
+def publish_search_admin2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(word) >= 0:
+                    if str(foundNews['isOn']) == '1':
+                        if foundNews['group'] == "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish2.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish2-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publish_search_admin3', methods=['POST'])
+def publish_search_admin3():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(word) >= 0:
+                    if str(foundNews['isOn']) == '0':
+                        if foundNews['group'] != "@มหาวิทยาลัย":
+                            if foundNews['group'] == session['branch']:
+                                data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish3-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publishAD1_search', methods=['POST'])
+def publishAD1_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
+                        word) >= 0:
+                    if str(foundNews['isOn']) == '1':
+                        if foundNews['group'] != "@มหาวิทยาลัย":
+                                data.append(newsDict)
         else:
             newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
@@ -1540,9 +1801,98 @@ def publish_search():
             return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
                                    my_id=session['id'])
         elif session['status'] == 1:
-            return render_template('./admin/publish-admin.html', data=data, length=len(data),
+            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
                                    my_group=session['branch'], my_id=session['id'])
 
+@app.route('/publishAD2_search', methods=['POST'])
+def publishAD2_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
+                        word) >= 0:
+                    if session['id'] == "admin":
+                        if foundNews['group'] == "@มหาวิทยาลัย":
+                            if str(foundNews['isOn']) == '1':
+                                data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
+                                   my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
+                                   my_group=session['branch'], my_id=session['id'])
+
+@app.route('/publishAD3_search', methods=['POST'])
+def publishAD3_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('News').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundNews = db.child('News').child(i).get().val()
+                if "0" != str(foundNews['isOn']):
+                    isOn = "โพส"
+                else:
+                    isOn = "ไม่โพส"
+                detail = foundNews['detail'].split('\r\n')
+                img = storage.child("news/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                if foundNews['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                if foundNews['group'] == session['branch']:
+                    isUr = 1
+                else:
+                    isUr = 0
+                newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
+                            'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
+                            'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
+                            'isOn': isOn}
+                if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
+                        word) >= 0:
+                    if str(foundNews['isOn']) == '0':
+                                data.append(newsDict)
+        else:
+            newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
+                                   my_id=session['id'])
+        elif session['status'] == 1:
+            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
+                                   my_group=session['branch'], my_id=session['id'])
 
 @app.route('/activity_search', methods=['POST'])
 def activity_search():
@@ -1563,8 +1913,10 @@ def activity_search():
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
                             'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
-                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0:
-                    data.append(newsDict)
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] == session['branch']:
+                            data.append(newsDict)
         else:
             newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
@@ -1575,6 +1927,235 @@ def activity_search():
         elif session['status'] == 1:
             return render_template('./admin/activity-admin.html', data=data, length=len(data))
 
+@app.route('/activity_search_2', methods=['POST'])
+def activity_search_2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] == "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activity-admin.html', data=data, length=len(data))
+
+@app.route('/activity_search_admin', methods=['POST'])
+def activity_search_admin():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] == session['branch']:
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activity-admin.html', data=data, length=len(data))
+
+@app.route('/activity_search_admin2', methods=['POST'])
+def activity_search_admin2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] == "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activity2-admin.html', data=data, length=len(data))
+
+@app.route('/activity_search_admin3', methods=['POST'])
+def activity_search_admin3():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '0':
+                        if foundEvent['group'] == session['branch']:
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activity3-admin.html', data=data, length=len(data))
+
+@app.route('/activityAD1_search', methods=['POST'])
+def activityAD1_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] != "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activityAD1-admin.html', data=data, length=len(data))
+
+@app.route('/activityAD2_search', methods=['POST'])
+def activityAD2_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '1':
+                        if foundEvent['group'] == "@มหาวิทยาลัย":
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activityAD2-admin.html', data=data, length=len(data))
+
+@app.route('/activityAD3_search', methods=['POST'])
+def activityAD3_search():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allNews = db.child('Event').get().val()
+        data = []
+        if not allNews is None:
+            for i in allNews:
+                foundEvent = db.child('Event').child(i).get().val()
+                if session['status'] == 0:
+                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
+                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
+                                                                          "%d/%m/%Y") >= datetime.datetime.today():
+                        continue
+                detail = foundEvent['detail'].split('\r\n')
+                img = storage.child("event/" + i).get_url(None)
+                dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
+                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
+                    if str(foundEvent['isOn']) == '0':
+                            data.append(newsDict)
+        else:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 0:
+            return render_template('activity.html', data=data, length=len(data))
+        elif session['status'] == 1:
+            return render_template('./admin/activityAD3-admin.html', data=data, length=len(data))
 
 @app.route('/interact_search', methods=['POST'])
 def interact_search():
@@ -1613,6 +2194,42 @@ def interact_search():
         elif session['status'] == 0:
             return render_template('interact.html', data=data, by='', length=len(data))
 
+@app.route('/interact_search_report', methods=['POST'])
+def interact_search_report():
+    if request.method == 'POST':
+        allThread = db.child('Thread').get().val()
+        bword = db.child('BWord').get().val()
+        word = request.form.get('search_txt')
+        data = []
+        if not allThread is None:
+            for i in allThread:
+                foundThread = db.child('Thread').child(i).get().val()
+                detail = foundThread['detail'].split('\r\n')
+                title = functools.reduce(
+                    lambda a, b:
+                    a.replace(b["Keyword"], b["Replace"])
+                    , bword
+                    , foundThread['title']
+                )
+                if foundThread['owner'] == session['id']:
+                    isYour = 1
+                else:
+                    isYour = 0
+                dt = 'สร้างเมื่อ ' + foundThread['date'] + ' ' + foundThread['time']
+                newsDict = {'id': i, 'title': title, 'detail': detail, 'owner': foundThread['owner'],
+                            'length': len(detail), 'datetime': dt, 'date': foundThread['date'],
+                            'time': foundThread['time'], 'isYour': isYour}
+                if foundThread['title'].find(word) >= 0:
+                    data.append(newsDict)
+        else:
+            newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
+            data.append(newDict)
+        if len(data) > 1:
+            sort(data)
+        if session['status'] == 1:
+            return render_template('./admin/report-admin.html', data=data, by='', length=len(data))
+        elif session['status'] == 0:
+            return render_template('interact.html', data=data, by='', length=len(data))
 
 # ข้อมูลผู้ใช้
 @app.route('/user-admin.html')
@@ -1635,7 +2252,7 @@ def user_admin():
                             'password': foundUser['password'], 'status': status,
                             'email': foundUser['email'], 'branch': foundUser['branch'], 'isOn': isOn}
                 data.append(userDict)
-    return render_template('./admin/user-admin.html', data=data, by='', my_group=session['branch'], my_id=session['id'])
+    return render_template('./admin/user-admin.html', data=data, by='', my_group=session['branch'], my_id=session['id'],my_name=session['name'])
 
 
 @app.route('/user-admin.html/closed')
@@ -1751,6 +2368,7 @@ def delete_user():
 def delete_event():
     if request.method == 'POST':
         db.child('Event').child(request.form.get('id')).remove()
+        storage.child('news').child(request.form.get('id')).put('logo.jpg')
     if session['id'] == "admin":
         return redirect(url_for('activity_admin_2'))
     elif session['id'] != "admin":
@@ -1786,8 +2404,15 @@ def delete_report(id: str, tid: str):
     if session['status'] == 0:
         return redirect(url_for('interact'))
     elif session['status'] == 1:
-        return redirect(url_for('interact_admin'))
+        return redirect(url_for('report_admin'))
 
+@app.route('/delete_report2/<string:id>')
+def delete_report2(id: str):
+    db.child('Report').child(id).remove()
+    if session['status'] == 0:
+        return redirect(url_for('interact'))
+    elif session['status'] == 1:
+        return redirect(url_for('report_admin'))
 
 def getAllEmail():
     allUser = db.child('User').get().val()
@@ -1850,6 +2475,22 @@ def success():
                     prefix = 'รองศาสตราจารย์'
                 elif prefix == 'atp':
                     prefix = 'ผู้ช่วยศาสตราจารย์'
+                if branch == '@มหาวิทยาลัย':
+                    branch = '@มหาวิทยาลัย'
+                elif branch == 'ครุศาสตร์อุตสาหกรรม':
+                    branch = 'ครุศาสตร์อุตสาหกรรม'
+                elif branch == 'บริหารธุรกิจ':
+                    branch = 'บริหารธุรกิจ'
+                elif branch == 'วิทยาศาสตร์และเทคโนโลยี':
+                    branch = 'วิทยาศาสตร์และเทคโนโลยี'
+                elif branch == 'วิศวกรรมศาสตร์':
+                    branch = 'วิศวกรรมศาสตร์'
+                elif branch == 'ศิลปศาสตร์':
+                    branch = 'ศิลปศาสตร์'
+                elif branch == 'อุตสาหกรรมสิ่งทอ':
+                    branch = 'อุตสาหกรรมสิ่งทอ'
+                elif branch == 'เทคโนโลยีคหกรรมศาสตร์':
+                    branch = 'เทคโนโลยีคหกรรมศาสตร์'
                 newUser = {'name': name, 'prefix': prefix, 'password': password, 'status': status, 'email': email,
                            'branch': branch, 'notify': '0', 'isOn': isOn}
                 db.child('User').child(id).set(newUser)
@@ -1860,18 +2501,11 @@ def success():
                     os.remove('temp_profile.jpg')
                 else:
                     storage.child('profile').child(id).put('default_profile_pic_001.png')
-                return render_template("./admin/add-user-admin.html",
-                                       data={'notify': 1, 'id': '', 'prefix': '', 'name': '', 'status': '',
-                                             'branch': ''})
-            return render_template("./admin/add-user-admin.html", data={'notify': 3, 'id': request.form.get('id'),
-                                                                        'prefix': request.form.get('prefix'),
-                                                                        'name': request.form.get('name'),
-                                                                        'status': status,
-                                                                        'branch': request.form.get('branch')})
-        return render_template("./admin/add-user-admin.html", data={'notify': 2, 'name': request.form.get('name'),
-                                                                    'prefix': request.form.get('prefix'),
-                                                                    'status': status, 'email': email,
-                                                                    'branch': request.form.get('branch')})
+                return render_template("./admin/add-user-admin.html",data={'notify': 1, 'id': '', 'prefix': '', 'name': '', 'status': '','branch': ''})
+            return render_template("./admin/add-user-admin.html", data={'notify': 3, 'id': request.form.get('id'),'prefix': request.form.get('prefix'),
+                                                                        'name': request.form.get('name'),'status': status,'branch': request.form.get('branch')})
+        return render_template("./admin/add-user-admin.html", data={'notify': 2, 'name': request.form.get('name'),'prefix': request.form.get('prefix'),
+                                                                    'status': status, 'email': email,'branch': request.form.get('branch')})
 
 
 # เพิ่มผู้ใช้งานแบบแพ็ค
@@ -2038,7 +2672,6 @@ def success_news():
         elif session['id'] != "admin":
             return redirect(url_for('publish_admin'))
         return redirect(url_for('publish_admin'))
-
 
 @app.route('/edit_news', methods=['POST'])
 def edit_news():

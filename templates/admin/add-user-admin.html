@@ -22,6 +22,7 @@
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
           <a class="nav-link" href="index-admin.html">หน้าแรก</a>
+          <a class="nav-link" href="user-admin.html">ย้อนกลับ</a>
           <a href="/logout" class="btn btn-sm btn-outline-primary ml-lg-4">ออกจากระบบ</a>
         </div>
 
@@ -88,9 +89,13 @@
                   <br>
                   {% if my_id == 'admin' %}
                   <select name="branch" id="branch" class="btn-sm">
-                      {% for d in data %}
-                      <option value={{d}}> {{d}} </option>
-                      {% endfor %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
                   </select>
                   {% else %}
                     <input type="text" class="form-control" id="branch" name="branch" placeholder="กรุณากรอกรหัสผ่าน" value="{{my_group}}" readonly>

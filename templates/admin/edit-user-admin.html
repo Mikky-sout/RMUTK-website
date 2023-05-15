@@ -158,9 +158,69 @@
                   <br>
                   {% if my_id == 'admin' %}
                   <select name="branch" id="branch" class="btn-sm">
-                      {% for d in DBranch %}
-                      <option value={{d}}> {{d}} </option>
-                      {% endfor %}
+                      {% if data.branch == "ครุศาสตร์อุตสาหกรรม" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" selected>ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "บริหารธุรกิจ" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" selected>บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "วิทยาศาสตร์และเทคโนโลยี" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" selected>วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "วิศวกรรมศาสตร์" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" selected>วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "ศิลปศาสตร์" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" selected>ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "อุตสาหกรรมสิ่งทอ" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" selected>อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" >เทคโนโลยีคหกรรมศาสตร์</option>
+
+                    {% elif data.branch == "เทคโนโลยีคหกรรมศาสตร์" %}
+                        <option value="ครุศาสตร์อุตสาหกรรม" >ครุศาสตร์อุตสาหกรรม</option>
+                        <option value="บริหารธุรกิจ" >บริหารธุรกิจ</option>
+                        <option value="วิทยาศาสตร์และเทคโนโลยี" >วิทยาศาสตร์และเทคโนโลยี</option>
+                    <option value="วิศวกรรมศาสตร์" >วิศวกรรมศาสตร์</option>
+                    <option value="ศิลปศาสตร์" >ศิลปศาสตร์</option>
+                    <option value="อุตสาหกรรมสิ่งทอ" >อุตสาหกรรมสิ่งทอ</option>
+                    <option value="เทคโนโลยีคหกรรมศาสตร์" selected>เทคโนโลยีคหกรรมศาสตร์</option>
+                    {% endif %}
                   </select>
                   {% else %}
                     <input type="text" class="form-control" id="branch" name="branch" placeholder="กรุณากรอกรหัสผ่าน" value="{{my_group}}" readonly>
@@ -196,7 +256,20 @@
                 </div>
               </div>
               <div>
-               <input type="checkbox" id="checkbox" name="isOn" value="open">
+                {% if data.name != my_name %}
+                  {% if data.isOn == 1 %}
+                    <input type="checkbox" id="checkbox" name="isOn" value="open" checked >
+                  {% else %}
+                  <input type="checkbox" id="checkbox" name="isOn" value="open">
+                  {% endif %}
+                {% else %}
+                  {% if data.isOn == 1 %}
+                    <input type="checkbox" id="checkbox" name="isOn" value="open" checked hidden>
+                  {% else %}
+                  <input type="checkbox" id="checkbox" name="isOn" value="open" hidden>
+                  {% endif %}
+                {% endif %}
+
               <label for="checkbox"> เปิดใช้งานผู้ใช้</label>
               </div>
               <button type="submit" class="btn btn-primary">บันทึก</button>

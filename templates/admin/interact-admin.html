@@ -46,21 +46,22 @@
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
 
-          <h2 class="section-title1">กระทู้
-          </h2>
+          <h2 class="section-title1">กระทู้</h2>
 
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
 
               {% if by != '' %}
               <h2 class="br">โดย {{by}}</h2>
-              <input type="button" class="nav-link btn btn-sm btn-primary" onclick="location.href='/interact-admin.html';" value="แสดงกระทู้ทั้งหมด"/>
+              <input type="button" class="nav-link btn btn-sm " style="background:white;color:#2c8eb0;" onclick="location.href='/interact-admin.html';" value="แสดงกระทู้ทั้งหมด"/>
               {% else %}
-              <input type="button" class="nav-link btn btn-sm btn-primary" onclick="location.href='/interact-admin.html/{{my_id}}';" value="แสดงกระทู้ของฉัน"/>
+              <input type="button" class="nav-link btn btn-sm " style="background:#257b98;color:white;" onclick="location.href='/interact-admin.html/{{my_id}}';" value="แสดงกระทู้ของฉัน"/>
               {% endif %}
-          <a class="br nav-link btn btn-sm btn1 " href="/report-admin.html">รายงานกระทู้</a>
+          <a class="br nav-link btn btn-sm btn1 " href="/report-admin.html">รายงานกระทู้ [ {{CoustRp}} ]</a>
           <a href="add-interact-admin.html" class=" nav-link btn btn-sm btn-primary ">เพิ่มข้อมูล</a>
+
         </nav>
+
         {% for thread in data %}
         {% if thread.id != 't000' %}
           <div onclick="location.href='/interact_details.html/{{thread.id}}'" class="card3">
@@ -87,11 +88,10 @@
 
                     </div>
                       {% endif %}
+
             {% endif %}
                 {% endfor %}
         </div>
-
-
       </div>
     </div>
   </section>

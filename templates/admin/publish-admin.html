@@ -20,7 +20,7 @@
         <div class="collapse navbar-collapse text-center" id=navigation>
           <ul class="navbar-nav mx-auto align-items-center">
 
-            <form class="form-inline search-wrapper d-none d-lg-block" action="/publish_search" method="POST">
+            <form class="form-inline search-wrapper d-none d-lg-block" action="/publish_search_admin" method="POST">
               <input type='search' id="search" name="search_txt" class="form-control" placeholder=" ค้นหาข้อมูล...">
               <button class="border-0 bg-white" type="submit"><i class="ti-search"></i></button>
             </form>
@@ -41,21 +41,21 @@
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
 
-            <a input type="button" href="/add-publish-admin.html" class=" nav-link btn btn-sm btn-primary">เพิ่มข่าว</a>
+            <a input type="button" href="/add-publish-admin.html" class=" nav-link btn btn-sm add">เพิ่มข่าว</a>
             {% if my_id == "admin" %}
               {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish-admin.html/2';" value="ข่าวคณะ"/>
+                <input type="button" class="br nav-link btn btn-sm group" onclick="location.href='/publish-admin.html';" value="ข่าวคณะ"/>
               {% else %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish-admin.html/rmutk2';" value="ข่าวมหาวิทยาลัย"/>
+                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publishAD2-admin.html';" value="ข่าวมหาวิทยาลัย"/>
               {% endif %}
-                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publish-admin.html/closed2';" value="ข่าวที่ปิดการใช้งาน"/>
+                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publishAD3-admin.html';" value="ข่าวที่ปิดการใช้งาน"/>
             {% else %}
                 {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish-admin.html';" value="ข่าวคณะ"/>
+                <input type="button" class="br nav-link btn btn-sm group" onclick="location.href='/publish-admin.html';" value="ข่าวคณะ"/>
               {% else %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish-admin.html/rmutk';" value="ข่าวมหาวิทยาลัย"/>
+                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish2-admin.html';" value="ข่าวมหาวิทยาลัย"/>
               {% endif %}
-                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publish-admin.html/closed';" value="ข่าวที่ปิดการใช้งาน"/>
+                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publish3-admin.html';" value="ข่าวที่ปิดการใช้งาน"/>
             {% endif %}
         </nav>
 

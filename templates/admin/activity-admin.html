@@ -22,7 +22,7 @@
         <div class="collapse navbar-collapse text-center" id=navigation>
           <ul class="navbar-nav mx-auto align-items-center">
 
-            <form class="form-inline search-wrapper d-none d-lg-block" action="/activity_search" method="POST">
+            <form class="form-inline search-wrapper d-none d-lg-block" action="/activity_search_admin" method="POST">
               <input type='search' id="search" name="search_txt" class="form-control" placeholder=" ค้นหาข้อมูล...">
               <button class="border-0 bg-white" type="submit"><i class="ti-search"></i></button>
             </form>
@@ -39,25 +39,12 @@
     <div class="container">
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-          <h2 class="section-title1">ข่าวกิจกรรม</h2>
+          <h2 class="section-title1">ข่าวกิจกรรม คณะ</h2>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
-            <a input type="button" href="/add-activity-admin.html" class="nav-link btn btn-sm btn-primary ">เพิ่มข่าว</a>
-          {% if my_id == "admin" %}
-              {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity-admin.html/2';" value="ข่าวคณะ"/>
-              {% else %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity-admin.html/rmutk2';" value="ข่าวมหาวิทยาลัย"/>
-              {% endif %}
-                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/activity-admin.html/closed';" value="ข่าวที่ปิดการใช้งาน"/>
-            {% else %}
-                {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity-admin.html';" value="ข่าวคณะ"/>
-              {% else %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity-admin.html/rmutk';" value="ข่าวมหาวิทยาลัย"/>
-              {% endif %}
-                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/activity-admin.html/closed';" value="ข่าวที่ปิดการใช้งาน"/>
-            {% endif %}
+            <a input type="button" href="/add-activity-admin.html" class="nav-link btn btn-sm add ">เพิ่มข่าว</a>
+ <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity2-admin.html';" value="ข่าวมหาวิทยาลัย"/>
+                <input type="button"  class=" nav-link btn btn-sm btn1" onclick="location.href='/activity3-admin.html';" value="ข่าวที่ปิดการใช้งาน"/>
 
 
         </nav>
@@ -73,7 +60,7 @@
                 <div class="dropdown" style="float:right;">
                 <button class="dropbtn"><i class="fa fa-ellipsis-v" style="font-size:20px"></i></button>
                   <div class="dropdown-content">
-                    <form action="/delete_news" method=post>
+                    <form action="/delete_event" method=post>
                       <input type="hidden" name="id" value="{{event.id}}">
                       <a><input type="button" class=" btn btn-sm btn-primary" onclick="location.href='/edit-activity-admin.html/{{event.id}}';" value="แก้ไขข้อมูล" /></a>
                       <a href="#"> <input type="submit" class=" btn btn-sm btn-security " style='float: right;' name="delete" value="ลบช้อมูล" ></a>
@@ -84,7 +71,7 @@
                 <div class="dropdown" style="float:right;">
                 <button class="dropbtn"><i class="fa fa-ellipsis-v" style="font-size:20px"></i></button>
                   <div class="dropdown-content">
-                    <form action="/delete_news" method=post>
+                    <form action="/delete_event" method=post>
                       <input type="hidden" name="id" value="{{event.id}}">
                       <a><input type="button" class=" btn btn-sm btn-primary" onclick="location.href='/edit-activity-admin.html/{{event.id}}';" value="แก้ไขข้อมูล" /></a>
                       <a href="#"> <input type="submit" class=" btn btn-sm btn-security " style='float: right;' name="delete" value="ลบช้อมูล" ></a>

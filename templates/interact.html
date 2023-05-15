@@ -54,9 +54,9 @@
 
               {% if by != '' %}
               <h2 class="br">โดย {{by}}</h2>
-              <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/interact.html';" value="แสดงกระทู้ทั้งหมด"/>
+              <input type="button" class="br nav-link btn btn-sm " style="background:white;color:#2c8eb0;" onclick="location.href='/interact.html';" value="แสดงกระทู้ทั้งหมด"/>
               {% else %}
-              <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/interact.html/{{my_id}}';" value="แสดงกระทู้ของฉัน"/>
+              <input type="button" class="br nav-link btn btn-sm" style="background:#257b98;color:white;" onclick="location.href='/interact.html/{{my_id}}';" value="แสดงกระทู้ของฉัน"/>
               {% endif %}
           <a href="add-interact-admin.html" class=" nav-link btn btn-sm btn-primary ">เพิ่มข้อมูล</a>
         </nav>
@@ -73,14 +73,17 @@
             <div class="name"><h2>ยังไม่มีกระทู้</h2> </div>
             {% endif %}
           </div>
-          </div>
+            </div>
+            {% if thread.id != 't000' %}
             {% if my_id == thread.owner %}
                 <input type="button" style="padding: 6.5px 10px" class="a1 btn btn-primary" onclick="location.href='/edit-interact-admin.html/{{thread.id}}';" value="แก้ไขข้อมูล" />
                 <input type="button" class="a2 nav-link btn btn-security" style="padding: 5px 10px" onclick="location.href='/delete_interact/{{thread.id}}';" value="ลบกระทู้" />
-
                 {% else %}
-                <input type="button" style="padding: 5px 10px" class="a3 nav-link btn btn-security"  value="รีพอส" />
                 {% endif %}
+            {% endif %}
+
+
+
                 {% endfor %}
 
 
