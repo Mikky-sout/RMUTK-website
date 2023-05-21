@@ -35,6 +35,7 @@
         <div class="p-5 shadow rounded">
           <div class="card5"> <img src="https://sp-ao.shortpixel.ai/client/to_auto,q_lossy,ret_img,w_300,h_212/https://www.rmutk.ac.th/wp-content/uploads/2018/07/Untitled-300x212.jpg" alt="">
         </div>
+            <div class="card-block" style="left: -21px;position: relative;"></div>
           <h1 class="text1" align=center>คณะ</h1>
             <div class="row">
               <p><div class="text3 col-md" align="center">
@@ -57,6 +58,7 @@
               </div></p>
             </div>
           <div>
+              <div class="card-block" style="left: -21px;position: relative;"></div>
               <div align="center">
                 <h1>สำนักงานอธิการบดี</h1>
               </div>
@@ -69,6 +71,7 @@
               <div align="center" class="mb-30">
                   <a href ="https://gad.rmutk.ac.th/" target="_blank"><img src="{{ url_for('static', filename = 'images/6.png') }}" width="60%"></a>
               </div>
+              <div class="card-block" style="left: -21px;position: relative;"></div>
               <div align="center">
                 <h1>แผนที่มหาวิทยาลัย</h1>
               </div>
@@ -81,8 +84,22 @@
   </div>
 </section>
 
-<footer>
-  <div class="container"></div>
+<footer class="colorfooter">
+  <div class="container">
+    <div class="row align-items-center border-bottom py-2">
+      <div class="foot">
+        <ul class="list-inline footer-menu text-center text-lg-left">
+          <li class="list-inline-item"><a></a></li>
+        </ul>
+      </div>
+      <div class="col-lg-4 text-center mb-4 mb-lg-0">
+        <a class="navbar-brand" href="">
+          <img class="img-fluid" src="{{ url_for('static', filename = 'images/logo2.png') }}" alt="Hugo documentation theme" width="200px">
+        </a>
+      </div>
+
+    </div>
+  </div>
 </footer>
 
 

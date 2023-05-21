@@ -21,8 +21,11 @@
         <div class="collapse navbar-collapse text-center" id=navigation>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
-          <a class="nav-link" href="index-admin.html">หน้าแรก</a>
+          {% if my_id == "admin" %}
+          <a class="nav-link" href="userAD1-admin.html">ย้อนกลับ</a>
+          {% else %}
           <a class="nav-link" href="user-admin.html">ย้อนกลับ</a>
+          {% endif %}
           <a href="/logout" class="btn btn-sm btn-outline-primary ml-lg-4">ออกจากระบบ</a>
         </div>
 
@@ -128,7 +131,11 @@
               <label for="checkbox"> เปิดใช้งานผู้ใช้</label>
               </div>
               <button type="submit" class="btn btn-primary">บันทึก</button>
+              {% if my_id == "admin" %}
+              <button onclick="location.href='userAD1-admin.html'" class="btn btn-security">ยกเลิก</button>
+              {% else %}
               <button onclick="location.href='user-admin.html'" class="btn btn-security">ยกเลิก</button>
+              {% endif %}
             </form>
 
             <br><br><br>

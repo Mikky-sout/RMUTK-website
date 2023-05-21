@@ -57,12 +57,18 @@
             </div>
 
             <div class="form-group">
-                <label>กำหนดวันโพส</label>
+                <label>กำหนดวัน "โพสต์ข่าว"</label>
               <input type="date" id="txtDate" name="datepost" min="{{min}}" value=""/>
-
-                <label>ระบุวันที่ลบ</label>
+               <br>
+                <br>
+                <label>กำหนดวัน "ปิดข่าว"</label>
+              <input type="date" id="txtDate" name="dateclosed" min="{{min}}" value=""/>
+                <br>
+                <br>
+                <label>กำหนดวัน "ยกเลิกข่าว"</label>
               <input type="date" id="txtDate" name="date" min="{{min}}" value=""/>
-                <br><label style="color:red;font-size: 20px;font-weight: bold;">(หากกำหนดวันโพสสามารถไม่ต้องกำหนดวันลบได้)</label>
+
+                <br><label style="color:red;font-size: 20px;font-weight: bold;">(หากกำหนดวันโพสต์ ไม่จำเป็นต้องกำหนดวันยกเลิก)</label>
             </div>
 
             <div class="form-group">
@@ -86,7 +92,7 @@
                   </div>
             <button type="submit" class="btn btn-primary">บันทึก</button>
               {% if my_id == "admin" %}
-            <a><button type="button" class="btn btn-security" onclick="location.href='/publish-admin.html/2';" >ยกเลิก</button></a>
+            <a><button type="button" class="btn btn-security" onclick="location.href='/publishAD1-admin.html';" >ยกเลิก</button></a>
               {% elif my_id != "admin" %}
               <a><button type="button" class="btn btn-security" onclick="location.href='/publish-admin.html';" >ยกเลิก</button></a>
               {% endif %}

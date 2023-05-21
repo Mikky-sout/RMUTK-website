@@ -71,6 +71,11 @@ def autoDelete():
                                                              '%d/%m/%Y %H:%M:%S')
                     if toCheckDate.date() <= datetime.datetime.today().date():
                         db.child(subType).child(item).update({"isOn": "1"})
+                if not currentItem[item]['date_closed'] == '':
+                    toCheckDate = datetime.datetime.strptime(currentItem[item]['date_closed'] + ' 00:00:00',
+                                                             '%d/%m/%Y %H:%M:%S')
+                    if toCheckDate.date() <= datetime.datetime.today().date():
+                        db.child(subType).child(item).update({"isOn": "0"})
 
 
 def sort(arr):
@@ -332,7 +337,6 @@ def publish_admin_closed():
     if data == []:
         newDict = {'id': 'n000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
-    print(data)
     return render_template('./admin/publish3-admin.html', data=data, by=session['id'])
 
 
@@ -1147,7 +1151,6 @@ def activity_admin_closed():
     if data == []:
         newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
-    print(data)
     return render_template('./admin/activity3-admin.html', data=data, by=session['id'])
 
 @app.route('/activityAD1-admin.html')
@@ -1296,7 +1299,6 @@ def activity_admin_closed2():
     if data == []:
         newDict = {'id': 'e000', 'title': 'ไม่มีข่าวปิดการใช้งาน', 'detail': ''}
         data.append(newDict)
-    print(data)
     return render_template('./admin/activityAD3-admin.html', data=data, by=session['id'])
 
 
@@ -1337,7 +1339,6 @@ def edit_interact_admin(id: str):
     DBranch = []
     for i in BDl:
         DBranch.append(i)
-    print(data)
     return render_template('./admin/edit-interact-admin.html', data=data, id=id, my_group=session['branch'],
                            my_id=session['id'], DBranch=DBranch, img=img)
 
@@ -1501,11 +1502,16 @@ def edit_activity_admin(id: str):
     else:
         post = datetime.datetime.strptime(data['date_post'] + ' 00:00:00', '%d/%m/%Y %H:%M:%S')
         post = str(post)[0:10]
+    if data['date_closed'] == '':
+        close = ''
+    else:
+        close = datetime.datetime.strptime(data['date_closed'] + ' 00:00:00', '%d/%m/%Y %H:%M:%S')
+        close = str(close)[0:10]
     DBranch = []
     for i in BDl:
         DBranch.append(i)
     return render_template('./admin/edit-activity-admin.html', data=data, id=id, min=getNextDay(), date=str(date)[0:10],
-                           post=str(post)[0:10], my_group=session['branch'], DBranch=DBranch, my_id=session['id'])
+                           post=str(post)[0:10],close=str(close)[0:10], my_group=session['branch'], DBranch=DBranch, my_id=session['id'])
 
 
 @app.route('/edit-publish-admin.html/<string:id>')
@@ -1522,11 +1528,16 @@ def edit_publish_admin(id: str):
     else:
         post = datetime.datetime.strptime(data['date_post'] + ' 00:00:00', '%d/%m/%Y %H:%M:%S')
         post = str(post)[0:10]
+    if data['date_closed'] == '':
+        close = ''
+    else:
+        close = datetime.datetime.strptime(data['date_closed'] + ' 00:00:00', '%d/%m/%Y %H:%M:%S')
+        close = str(close)[0:10]
     DBranch = []
     for i in BDl:
         DBranch.append(i)
     return render_template('./admin/edit-publish-admin.html', data=data, id=id, min=getNextDay(), date=str(date)[0:10],
-                           post=str(post)[0:10], my_group=session['branch'], DBranch=DBranch, my_id=session['id'])
+                           post=str(post)[0:10],close=str(close)[0:10], my_group=session['branch'], DBranch=DBranch, my_id=session['id'])
 
 
 @app.route('/edit-user-admin.html/<string:id>')
@@ -1764,17 +1775,25 @@ def publishAD1_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('News').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundNews = db.child('News').child(i).get().val()
-                if "0" != str(foundNews['isOn']):
-                    isOn = "โพส"
+                if "1" == str(foundNews['isOn']):
+                    type = 'โพส'
                 else:
-                    isOn = "ไม่โพส"
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    NewsNew = "New"
+                else:
+                    NewsNew = ""
                 detail = foundNews['detail'].split('\r\n')
                 img = storage.child("news/" + i).get_url(None)
-                dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
+                dt = 'โพสเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
                 if foundNews['owner'] == session['id']:
                     isYour = 1
                 else:
@@ -1786,7 +1805,7 @@ def publishAD1_search():
                 newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                             'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
                             'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
-                            'isOn': isOn}
+                            'type': type, 'NewsNew': NewsNew}
                 if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
                         word) >= 0:
                     if str(foundNews['isOn']) == '1':
@@ -1795,28 +1814,36 @@ def publishAD1_search():
         else:
             newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
                                    my_id=session['id'])
         elif session['status'] == 1:
-            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
-                                   my_group=session['branch'], my_id=session['id'])
+            return render_template('./admin/publishAD1-admin.html', data=data, length=len(data),
+                                   my_group=session['branch'], my_id=session['id'],by='')
 
 @app.route('/publishAD2_search', methods=['POST'])
 def publishAD2_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('News').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundNews = db.child('News').child(i).get().val()
-                if "0" != str(foundNews['isOn']):
-                    isOn = "โพส"
+                if "1" == str(foundNews['isOn']):
+                    type = 'โพส'
                 else:
-                    isOn = "ไม่โพส"
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    NewsNew = "New"
+                else:
+                    NewsNew = ""
                 detail = foundNews['detail'].split('\r\n')
                 img = storage.child("news/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -1831,7 +1858,7 @@ def publishAD2_search():
                 newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                             'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
                             'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
-                            'isOn': isOn}
+                            'type': type, 'NewsNew': NewsNew}
                 if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
                         word) >= 0:
                     if session['id'] == "admin":
@@ -1841,13 +1868,13 @@ def publishAD2_search():
         else:
             newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
                                    my_id=session['id'])
         elif session['status'] == 1:
-            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
+            return render_template('./admin/publishAD2-admin.html', data=data, length=len(data),
                                    my_group=session['branch'], my_id=session['id'])
 
 @app.route('/publishAD3_search', methods=['POST'])
@@ -1855,14 +1882,22 @@ def publishAD3_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('News').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundNews = db.child('News').child(i).get().val()
-                if "0" != str(foundNews['isOn']):
-                    isOn = "โพส"
+                if "1" == str(foundNews['isOn']):
+                    type = 'โพส'
                 else:
-                    isOn = "ไม่โพส"
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundNews['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    NewsNew = "New"
+                else:
+                    NewsNew = ""
                 detail = foundNews['detail'].split('\r\n')
                 img = storage.child("news/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundNews['date'] + ' ' + foundNews['time']
@@ -1877,7 +1912,7 @@ def publishAD3_search():
                 newsDict = {'id': i, 'title': foundNews['title'], 'detail': detail, 'owner': foundNews['owner'],
                             'image': img, 'group': foundNews['group'], 'isUr': isUr, 'length': len(detail),
                             'datetime': dt, 'date': foundNews['date'], 'time': foundNews['time'], 'isYour': isYour,
-                            'isOn': isOn}
+                            'type': type, 'NewsNew': NewsNew}
                 if newsDict['title'].find(word) >= 0 or foundNews['detail'].find(word) >= 0 or foundNews['group'].find(
                         word) >= 0:
                     if str(foundNews['isOn']) == '0':
@@ -1885,13 +1920,13 @@ def publishAD3_search():
         else:
             newDict = {'id': 'n000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('publish.html', data=data, length=len(data), my_group=session['branch'],
                                    my_id=session['id'])
         elif session['status'] == 1:
-            return render_template('./admin/publish3-admin.html', data=data, length=len(data),
+            return render_template('./admin/publishAD3-admin.html', data=data, length=len(data),
                                    my_group=session['branch'], my_id=session['id'])
 
 @app.route('/activity_search', methods=['POST'])
@@ -1899,20 +1934,23 @@ def activity_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] == session['branch']:
@@ -1920,8 +1958,8 @@ def activity_search():
         else:
             newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('activity.html', data=data, length=len(data))
         elif session['status'] == 1:
@@ -1932,20 +1970,28 @@ def activity_search_2():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] == "@มหาวิทยาลัย":
@@ -1956,7 +2002,7 @@ def activity_search_2():
         if len(data) > 1:
             sort(data)
         if session['status'] == 0:
-            return render_template('activity.html', data=data, length=len(data))
+            return render_template('activity2.html', data=data, length=len(data))
         elif session['status'] == 1:
             return render_template('./admin/activity-admin.html', data=data, length=len(data))
 
@@ -1965,20 +2011,28 @@ def activity_search_admin():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] == session['branch']:
@@ -1998,20 +2052,28 @@ def activity_search_admin2():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] == "@มหาวิทยาลัย":
@@ -2019,8 +2081,8 @@ def activity_search_admin2():
         else:
             newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('activity.html', data=data, length=len(data))
         elif session['status'] == 1:
@@ -2031,20 +2093,28 @@ def activity_search_admin3():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '0':
                         if foundEvent['group'] == session['branch']:
@@ -2052,8 +2122,8 @@ def activity_search_admin3():
         else:
             newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
             data.append(newDict)
-        if len(data) > 1:
-            sort(data)
+        # if len(data) > 1:
+        #     sort(data)
         if session['status'] == 0:
             return render_template('activity.html', data=data, length=len(data))
         elif session['status'] == 1:
@@ -2064,20 +2134,27 @@ def activityAD1_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
-                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'],'type':type,'EventNew':EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] != "@มหาวิทยาลัย":
@@ -2097,20 +2174,28 @@ def activityAD2_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '1':
                         if foundEvent['group'] == "@มหาวิทยาลัย":
@@ -2130,20 +2215,28 @@ def activityAD3_search():
     if request.method == 'POST':
         word = request.form.get('search_txt')
         allNews = db.child('Event').get().val()
+        date, time, _ = getDateTime()
+        today = datetime.datetime.today()
         data = []
         if not allNews is None:
             for i in allNews:
                 foundEvent = db.child('Event').child(i).get().val()
-                if session['status'] == 0:
-                    if 'date_post' in foundEvent and foundEvent['date_post'] is not None and foundEvent[
-                        'date_post'] != '' and datetime.datetime.strptime(foundEvent['date_post'],
-                                                                          "%d/%m/%Y") >= datetime.datetime.today():
-                        continue
+                if "0" != str(foundEvent['isOn']):
+                    type = 'โพส'
+                else:
+                    type = 'ไม่โพส'
+                dw = datetime.datetime.strptime(foundEvent['date'], "%d/%m/%Y")
+                dwa = today - datetime.datetime(dw.year, dw.month, dw.day)
+                if dwa.days <= 7:
+                    EventNew = "New"
+                else:
+                    EventNew = ""
                 detail = foundEvent['detail'].split('\r\n')
                 img = storage.child("event/" + i).get_url(None)
                 dt = 'สร้างเมื่อ ' + foundEvent['date'] + ' ' + foundEvent['time']
                 newsDict = {'id': i, 'title': foundEvent['title'], 'detail': detail, 'length': len(detail),
-                            'datetime': dt, 'image': img, 'date': foundEvent['date'], 'time': foundEvent['time']}
+                            'datetime': dt, 'image': img,
+                            'date': foundEvent['date'], 'time': foundEvent['time'], 'type': type, 'EventNew': EventNew}
                 if newsDict['title'].find(word) >= 0 or foundEvent['detail'].find(word) >= 0 or foundEvent['group'].find(word) >= 0:
                     if str(foundEvent['isOn']) == '0':
                             data.append(newsDict)
@@ -2255,7 +2348,7 @@ def user_admin():
     return render_template('./admin/user-admin.html', data=data, by='', my_group=session['branch'], my_id=session['id'],my_name=session['name'])
 
 
-@app.route('/user-admin.html/closed')
+@app.route('/user2-admin.html')
 def user_admin_closed():
     allUser = db.child('User').get().val()
     data = []
@@ -2275,11 +2368,10 @@ def user_admin_closed():
                             'password': foundUser['password'], 'status': status,
                             'email': foundUser['email'], 'branch': foundUser['branch'], 'isOn': isOn}
                 data.append(userDict)
-    return render_template('./admin/user-admin.html', data=data, by=session['id'], my_group=session['branch'],
-                           my_id=session['id'])
+    return render_template('./admin/user2-admin.html', data=data, by='', my_group=session['branch'],my_id=session['id'],length=len(data))
 
 
-@app.route('/user-admin.html/2')
+@app.route('/userAD1-admin.html')
 def user_admin_2():
     allUser = db.child('User').get().val()
     data = []
@@ -2300,10 +2392,10 @@ def user_admin_2():
                                 'password': foundUser['password'], 'status': status,
                                 'email': foundUser['email'], 'branch': foundUser['branch'], 'isOn': isOn}
                     data.append(userDict)
-    return render_template('./admin/user-admin.html', data=data, by='', my_group=session['branch'], my_id=session['id'])
+    return render_template('./admin/userAD1-admin.html', data=data, by='', my_group=session['branch'], my_id=session['id'])
 
 
-@app.route('/user-admin.html/closed2')
+@app.route('/userAD2-admin.html')
 def user_admin_closed2():
     allUser = db.child('User').get().val()
     data = []
@@ -2323,8 +2415,7 @@ def user_admin_closed2():
                             'password': foundUser['password'], 'status': status,
                             'email': foundUser['email'], 'branch': foundUser['branch'], 'isOn': isOn}
                 data.append(userDict)
-    return render_template('./admin/user-admin.html', data=data, by=session['id'], my_group=session['branch'],
-                           my_id=session['id'])
+    return render_template('./admin/userAD2-admin.html', data=data, by='', my_group=session['branch'],my_id=session['id'],length=len(data))
 
 
 @app.route('/user_search', methods=['POST'])
@@ -2341,11 +2432,92 @@ def user_search():
                 status = 'นักศึกษา'
             userDict = {'id': i, 'name': foundUser['name'], 'password': foundUser['password'], 'status': status,
                         'email': foundUser['email'], 'branch': foundUser['branch']}
-            if userDict['id'].find(word) >= 0 or userDict['name'].find(word) >= 0 or userDict['branch'].find(word) >= 0:
-                data.append(userDict)
-        return render_template('./admin/user-admin.html', data=data, length=len(data), my_group=session['branch'],
-                               my_id=session['id'])
+            if str(userDict['id']).find(word) >= 0 or userDict['name'].find(word) >= 0 or userDict['branch'].find(word) >= 0 or userDict['email'].find(word) >= 0:
+                if str(foundUser['isOn']) == '1':
+                    if session['id'] != 'admin':
+                        if foundUser['branch'] == session['branch'] :
+                            data.append(userDict)
+                    else:
+                        data.append(userDict)
+        # if len(data) > 1:
+        #     sort(data)
+        return render_template('./admin/user-admin.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'],by='')
 
+@app.route('/user_search2', methods=['POST'])
+def user_search2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allUser = db.child('User').get().val()
+        data = []
+        for i in allUser:
+            foundUser = db.child('User').child(i).get().val()
+            if foundUser['status'] == 1:
+                status = 'แอดมิน'
+            else:
+                status = 'นักศึกษา'
+            userDict = {'id': i, 'name': foundUser['name'], 'password': foundUser['password'], 'status': status,
+                        'email': foundUser['email'], 'branch': foundUser['branch']}
+            if str(userDict['id']).find(word) >= 0 or userDict['name'].find(word) >= 0 or userDict['branch'].find(word) >= 0 or userDict['email'].find(word) >= 0:
+                if str(foundUser['isOn']) == '0':
+                    if session['id'] != 'admin':
+                        if foundUser['branch'] == session['branch'] :
+                            data.append(userDict)
+                    else:
+                        data.append(userDict)
+        # if len(data) > 1:
+        #     sort(data)
+        return render_template('./admin/user2-admin.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'],by='')
+
+@app.route('/user_search_1', methods=['POST'])
+def user_search_1():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allUser = db.child('User').get().val()
+        data = []
+        for i in allUser:
+            foundUser = db.child('User').child(i).get().val()
+            if foundUser['status'] == 1:
+                status = 'แอดมิน'
+            else:
+                status = 'นักศึกษา'
+            userDict = {'id': i, 'name': foundUser['name'], 'password': foundUser['password'], 'status': status,
+                        'email': foundUser['email'], 'branch': foundUser['branch']}
+            if str(userDict['id']).find(word) >= 0 or userDict['name'].find(word) >= 0 or userDict['branch'].find(
+                    word) >= 0 or userDict['email'].find(word) >= 0:
+                if str(foundUser['isOn']) == '0':
+                    if session['id'] != 'admin':
+                        if foundUser['branch'] == session['branch']:
+                            data.append(userDict)
+                    else:
+                        data.append(userDict)
+        # if len(data) > 1:
+        #     sort(data)
+        return render_template('./admin/userAD1-admin.html', data=data, length=len(data), my_group=session['branch'],my_id=session['id'], by='')
+
+@app.route('/user_search_2', methods=['POST'])
+def user_search_2():
+    if request.method == 'POST':
+        word = request.form.get('search_txt')
+        allUser = db.child('User').get().val()
+        data = []
+        for i in allUser:
+            foundUser = db.child('User').child(i).get().val()
+            if foundUser['status'] == 1:
+                status = 'แอดมิน'
+            else:
+                status = 'นักศึกษา'
+            userDict = {'id': i, 'name': foundUser['name'], 'password': foundUser['password'], 'status': status,
+                        'email': foundUser['email'], 'branch': foundUser['branch']}
+            if str(userDict['id']).find(word) >= 0 or userDict['name'].find(word) >= 0 or userDict[
+                'branch'].find(word) >= 0 or userDict['email'].find(word) >= 0:
+                if str(foundUser['isOn']) == '0':
+                    if session['id'] == 'admin':
+                        data.append(userDict)
+                    else:
+                        data.append(userDict)
+        # if len(data) > 1:
+        #     sort(data)
+        return render_template('./admin/userAD2-admin.html', data=data, length=len(data),my_group=session['branch'], my_id=session['id'], by='')
 
 @app.route('/delete_user', methods=['POST', 'GET'])
 def delete_user():
@@ -2361,7 +2533,10 @@ def delete_user():
             status = 'นักศึกษา'
         userDict = {'id': i, 'name': foundUser['name'], 'password': foundUser['password'], 'status': status}
         data.append(userDict)
-    return redirect(url_for('user_admin'))
+    if session['id'] == "admin":
+        return redirect(url_for('user_admin_2'))
+    else:
+        return redirect(url_for('user_admin'))
 
 
 @app.route('/delete_event', methods=['POST', 'GET'])
@@ -2502,10 +2677,8 @@ def success():
                 else:
                     storage.child('profile').child(id).put('default_profile_pic_001.png')
                 return render_template("./admin/add-user-admin.html",data={'notify': 1, 'id': '', 'prefix': '', 'name': '', 'status': '','branch': ''})
-            return render_template("./admin/add-user-admin.html", data={'notify': 3, 'id': request.form.get('id'),'prefix': request.form.get('prefix'),
-                                                                        'name': request.form.get('name'),'status': status,'branch': request.form.get('branch')})
-        return render_template("./admin/add-user-admin.html", data={'notify': 2, 'name': request.form.get('name'),'prefix': request.form.get('prefix'),
-                                                                    'status': status, 'email': email,'branch': request.form.get('branch')})
+            return render_template("./admin/add-user-admin.html", data={'notify': 3, 'id': request.form.get('id'),'prefix': request.form.get('prefix'),'name': request.form.get('name'),'status': status,'branch': request.form.get('branch')})
+        return render_template("./admin/add-user-admin.html", data={'notify': 2, 'name': request.form.get('name'),'prefix': request.form.get('prefix'),'status': status, 'email': email,'branch': request.form.get('branch')})
 
 
 # เพิ่มผู้ใช้งานแบบแพ็ค
@@ -2548,6 +2721,7 @@ def edit_user():
         status = request.form.get('status')
         email = request.form.get('email')
         prefix = request.form.get('prefix')
+
         foundUser = db.child('User').get().val()
         if not id in foundUser or id == oldId:
             if foundEmail(email) == False or email == oldEmail:
@@ -2582,7 +2756,10 @@ def edit_user():
                     file.save('temp_profile.jpg')
                     storage.child('profile').child(id).put('temp_profile.jpg')
                     os.remove('temp_profile.jpg')
-                return redirect(url_for('user_admin'))
+                if session['id'] == "admin":
+                    return redirect(url_for('user_admin_2'))
+                else:
+                    return redirect(url_for('user_admin'))
             return redirect(url_for('edit_user_admin', id=oldId))
         return redirect(url_for('edit_user_admin', id=oldId))
 
@@ -2638,6 +2815,12 @@ def success_news():
         detail = request.form.get('detail')
         del_date = request.form.get('date')
         groups = request.form.get('branch')
+        date_closed = request.form.get('dateclosed')
+        if date_closed == '' or date_closed is None:
+            dateclosed = ''
+        else:
+            dateclosed = date_closed.replace('-', '/')
+            dateclosed = getDateFormated(dateclosed)
         chx = request.form.get('isOn')
         isOn = 1
         if chx != "open":
@@ -2655,7 +2838,7 @@ def success_news():
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': detail, 'group': groups, 'owner': session['id'],
                    'date_post': postDate,
-                   'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn}
+                   'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
         db.child('News').child(currentID).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2679,10 +2862,16 @@ def edit_news():
         date, time, date7 = getDateTime()
         detail = request.form.get('detail')
         del_date = request.form.get('date')
+        date_closed = request.form.get('dateclosed')
         chx = request.form.get('isOn')
         isOn = 1
         if chx != "open":
             isOn = 0
+        if date_closed == '' or date_closed is None:
+            dateclosed = ''
+        else:
+            dateclosed = date_closed.replace('-', '/')
+            dateclosed = getDateFormated(dateclosed)
         if del_date == '':
             delDate = ''
         else:
@@ -2696,7 +2885,7 @@ def edit_news():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': detail, 'date_post': postDate, 'group': groups,
-                   'owner': session['id'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn}
+                   'owner': session['id'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
         db.child('News').child(request.form.get('id')).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2726,6 +2915,12 @@ def success_event():
         currentID = 'e' + format.format(id)
         date, time, date7 = getDateTime()
         del_date = request.form.get('date')
+        date_closed = request.form.get('dateclosed')
+        if date_closed == '' or date_closed is None:
+            dateclosed = ''
+        else:
+            dateclosed = date_closed.replace('-', '/')
+            dateclosed = getDateFormated(dateclosed)
         groups = request.form.get('branch')
         chx = request.form.get('isOn')
         isOn = 1
@@ -2744,7 +2939,7 @@ def success_event():
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': request.form.get('detail'), 'group': groups,
                    'owner': session['id'],
-                   'date_post': postDate, 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn}
+                   'date_post': postDate, 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
         db.child('Event').child(currentID).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2775,6 +2970,12 @@ def edit_event():
             delDate = del_date.replace('-', '/')
             delDate = getDateFormated(delDate)
         post_date = request.form.get('datepost')
+        date_closed = request.form.get('dateclosed')
+        if date_closed == '':
+            dateclosed = ''
+        else:
+            dateclosed = date_closed.replace('-', '/')
+            dateclosed = getDateFormated(dateclosed)
         groups = request.form.get('branch')
         chx = request.form.get('isOn')
         isOn = 1
@@ -2785,9 +2986,8 @@ def edit_event():
         else:
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
-        newEvent = {'title': request.form.get('title'), 'date_post': postDate, 'group': groups, 'owner': session['id'],
-                    'detail': detail,
-                    'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn}
+        newEvent = {'title': request.form.get('title'), 'date_post': postDate, 'group': groups, 'owner': session['id'],'detail': detail,
+                    'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
         db.child('Event').child(request.form.get('id')).set(newEvent)
         file = request.files['file']
         if not file.filename == "":

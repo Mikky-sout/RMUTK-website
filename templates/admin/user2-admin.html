@@ -23,7 +23,7 @@
           <i class="ti-align-right text-dark"></i></button>
         <div class="collapse navbar-collapse text-center" id=navigation>
           <ul class="navbar-nav mx-auto align-items-center">
-            <form class="form-inline search-wrapper d-none d-lg-block" action="/user_search" method="POST">
+            <form class="form-inline search-wrapper d-none d-lg-block" action="/user_search2" method="POST">
               <input type='search' id="search" name="search_txt" class="form-control" placeholder=" ค้นหาข้อมูล...">
               <button class="border-0 bg-white" type="submit"><i class="ti-search"></i></button>
             </form>
@@ -42,7 +42,7 @@
     <div class="container">
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-          {% if by != '' %}
+          {% if by == '' %}
             <h2 class="section-title1">ผู้ใช้งานที่โดนปิด</h2>
           {% else %}
             <h2 class="section-title1">ผู้ใช้งาน</h2>
@@ -52,7 +52,7 @@
 
           <form method="post" action="success_multiple" enctype="multipart/form-data">
             <a href="add-user-admin.html" class="nav-link btn btn-sm add mb-10">เพิ่มข้อมูล</a>
-              <a type="button" class="nav-link btn btn-sm btn1 mb-10" onclick="location.href='/user2-admin.html';">ผู้ใช้ปิดการใช้งาน</a>
+            <a type="button" class="nav-link btn btn-sm btn-primary mb-10" onclick="location.href='/user-admin.html';">ผู้ใช้เปิดการใช้งาน{{data.id}}</a>
             <input class="btn-sm mb-10 btn3" type="file" id="file-selector" accept=".csv" name="file">
             <input class="btn btn-sm btn-primary" type="submit" value="ยืนยัน">
             </form>
@@ -65,57 +65,6 @@
         {% else %}
 
         {% for user in data %}
-        {% if my_group == "admin" %}
-        <form action="/delete_user" method=post>
-        <div class="card3">
-            <table>
-                <thead >
-                  <tr>
-                    <th scope="col" ></th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row" width="25%">ชื่อผู้ใช้งาน  :</th>
-                    <th value="{{user.prefix}}" name="prefix">{{user.prefix}} {{user.name}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row" width="25%">รหัสประจำตัว :</th>
-                    <th ><input type="hidden" value="{{user.id}}" name="id">{{user.id}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row" width="25%">อีเมล</th>
-                    <th >{{user.email}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row" width="25%">รหัสผ่าน :</th>
-                    <th >{{user.password}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row" width="25%">คณะ :</th>
-                    <th >{{user.branch}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row" width="25%">สถานะ :</th>
-                    <th >{{user.status}}</th>
-                  </tr>
-                  <tr>
-                    <th scope="row"></th>
-                    <th>
-                      {% if user.id != "admin" %}
-                      <input type="submit" class=" btn btn-sm btn1 " style="float:right;" name="delete" value="ลบช้อมูล">
-                      <input type="button" class=" br btn btn-sm btn-primary" style="float:right;" onclick="location.href='/edit-user-admin.html/{{user.id}}';" value="แก้ไขข้อมูล" />
-                      {% endif %}
-                    </th>
-                  </tr>
-                </tbody>
-              </table>
-          </div>
-          </form>
-
-        {%else %}
-
         {% if user.branch == my_group %}
         <form action="/delete_user" method=post>
         <div class="card3">
@@ -167,8 +116,8 @@
           </div>
           </form>
         {% endif %}
-        {% endif %}
         {% endfor %}
+
         {% endif %}
       </div>
     </div>
@@ -177,27 +126,10 @@
 
 
 
-<footer class="colorfooter">
-  <div class="container">
-    <div class="row align-items-center border-bottom py-2">
-      <div class="foot">
-        <ul class="list-inline footer-menu text-center text-lg-left">
-          <li class="list-inline-item"></li>
-        </ul>
-      </div>
-      <div class="col-lg-4 text-center mb-4 mb-lg-0">
-        <a class="navbar-brand" >
-          <img class="img-fluid" src="/static/images/logo2.png" alt="Hugo documentation theme" width="200px">
-        </a>
-      </div>
-      <div class="col-lg-4">
-        <ul class="list-inline footer-menu text-center text-lg-right">
-          <li class="list-inline-item"><a href=""></a></li>
-        </ul>
-      </div>
+  <footer>
+    <div class="container">
     </div>
-  </div>
-</footer>
+  </footer>
 
 
 

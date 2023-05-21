@@ -37,25 +37,12 @@
     <div class="container">
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-          <h2 class="section-title1">ข่าวประชาสัมพันธ์</h2>
+          <h2 class="section-title1">ข่าวประชาสัมพันธ์ คณะ</h2>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
             <a input type="button" href="/add-publish-admin.html" class=" nav-link btn btn-sm add">เพิ่มข่าว</a>
-            {% if my_id == "admin" %}
-              {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm group" onclick="location.href='/publishAD1-admin.html';" value="ข่าวคณะ"/>
-              {% else %}
                 <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publishAD2-admin.html';" value="ข่าวมหาวิทยาลัย"/>
-              {% endif %}
                 <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publishAD3-admin.html';" value="ข่าวที่ปิดการใช้งาน"/>
-            {% else %}
-                {% if by != '' %}
-                <input type="button" class="br nav-link btn btn-sm group" onclick="location.href='/publish-admin.html';" value="ข่าวคณะ"/>
-              {% else %}
-                <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/publish2-admin.html';" value="ข่าวมหาวิทยาลัย"/>
-              {% endif %}
-                <input type="button"  class=" nav-link btn btn-sm btn1=" onclick="location.href='/publish3-admin.html';" value="ข่าวที่ปิดการใช้งาน"/>
-            {% endif %}
         </nav>
 
           {% if length == 0 %}
