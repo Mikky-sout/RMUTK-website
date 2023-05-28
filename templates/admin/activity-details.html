@@ -38,7 +38,15 @@
           <div class="infos">
             <p class="text fs">
               {% for i in range(data.length) %}
-            {% if i < data.length %} {{data.detail[i]}}<br>
+            {% if i < data.length %}
+              {% if data.url == "" %}
+                {{data.detail[i]}}
+                {% else %}
+              {{data.detail[i]}}
+            {% for url in urls %}
+            <p><a href={{url}}>{{url}}</a></p>
+            {% endfor %}
+            {% endif %}
               {% else %}
               {{data.detail[i]}}
               {% endif %}

@@ -51,6 +51,7 @@
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
 
+
               {% if by != '' %}
               <h2 class="br">โดย {{by}}</h2>
               <input type="button" class="nav-link btn btn-sm " style="background:white;color:#2c8eb0;" onclick="location.href='/interact-admin.html';" value="แสดงกระทู้ทั้งหมด"/>
@@ -61,7 +62,11 @@
           <a href="add-interact-admin.html" class=" nav-link btn btn-sm btn-primary ">เพิ่มข้อมูล</a>
 
         </nav>
-
+          {% if length == 0 %}
+            <div class="card3">
+                <h4>ไม่พบข้อมูลจากการค้นหา</h4>
+            </div>
+          {% else %}
         {% for thread in data %}
         {% if thread.id != 't000' %}
           <div onclick="location.href='/interact_details.html/{{thread.id}}'" class="card3">
@@ -91,6 +96,7 @@
 
             {% endif %}
                 {% endfor %}
+            {% endif %}
         </div>
       </div>
     </div>

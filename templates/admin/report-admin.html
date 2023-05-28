@@ -58,6 +58,11 @@
           <a href="/interact-admin.html" class="br nav-link btn btn-sm btn1 ">หน้ากระทู้</a>
         </nav>
 
+         {% if length == 0 %}
+            <div class="card3">
+                <h4>ไม่พบข้อมูลจากการค้นหา</h4>
+            </div>
+          {% else %}
         {% for report in data %}
         {% if report.id != 'rp000' %}
           <div onclick="location.href='/interact_details.html/{{report.tid}}'" class="card3">
@@ -89,6 +94,7 @@
                 <input type="button" style="padding: 3px 5px;margin: -74px 10px 44px 8px;bottom: -10px;" class="a2 nav-link btn btn-security" onclick="location.href='/delete_report/{{report.id}},{{report.tid}}';" value="ลบกระทู้" />
             {% endif %}
                 {% endfor %}
+            {% endif %}
         </div>
 
 

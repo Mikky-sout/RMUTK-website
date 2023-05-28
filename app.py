@@ -9,7 +9,7 @@ from os import path
 import pandas as pd
 import datetime
 import functools
-
+import re
 import os.path
 
 # firebase
@@ -500,9 +500,15 @@ def publish_admin_closed2():
 def publish_details_admin(id: str):
     foundNews = db.child('News').child(id).get().val()
     detail = foundNews['detail'].split('\r\n')
+    url = foundNews['url'].split('\r\n')
     img = storage.child("news/" + id).get_url(None)
-    data = {'title': foundNews['title'], 'detail': detail, 'length': len(detail), 'image': img}
-    return render_template('./admin/publish-details-admin.html', data=data)
+    urls = []
+    for line in url:
+        url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        found_urls = re.findall(url_pattern, line)
+        urls.extend(found_urls)
+    data = {'title': foundNews['title'], 'detail': detail, 'length': len(detail), 'image': img, 'urls':urls}
+    return render_template('./admin/publish-details-admin.html', data=data,urls=urls)
 
 
 # หน้าเพิ่มข่าวแอดมิน
@@ -855,10 +861,17 @@ def publish_custom_2():
 def publish_detail(id: str):
     foundNews = db.child('News').child(id).get().val()
     detail = foundNews['detail'].split('\r\n')
-    img = storage.child("news/" + id).get_url(None)
-    data = {'title': foundNews['title'], 'detail': detail, 'length': len(detail), 'image': img}
+    url = foundNews['url'].split('\r\n')
+    urls = []
+    for line in url:
+        url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        found_urls = re.findall(url_pattern, line)
+        urls.extend(found_urls)
 
-    return render_template('publish-detail.html', data=data)
+    img = storage.child("news/" + id).get_url(None)
+    data = {'title': foundNews['title'], 'detail': detail, 'length': len(detail), 'image': img, 'urls': urls}
+
+    return render_template('publish-detail.html', data=data,urls=urls)
 
 # ข่าวกิจกรรม
 @app.route('/activity.html')
@@ -966,8 +979,14 @@ def activity_details(id: str):
     foundEvent = db.child('Event').child(id).get().val()
     detail = foundEvent['detail'].split('\r\n')
     img = storage.child("event/" + id).get_url(None)
-    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img}
-    return render_template('./admin/activity-details.html', data=data)
+    url = foundEvent['url'].split('\r\n')
+    urls = []
+    for line in url:
+        url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        found_urls = re.findall(url_pattern, line)
+        urls.extend(found_urls)
+    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img,'urls':urls}
+    return render_template('./admin/activity-details.html', data=data,urls=urls)
 
 # ส่วนการค้นหา
 @app.route('/search.html')
@@ -1307,10 +1326,16 @@ def activity_admin_closed2():
 def activity_details_admin(id: str):
     foundEvent = db.child('Event').child(id).get().val()
     detail = foundEvent['detail'].split('\r\n')
+    url = foundEvent['url'].split('\r\n')
     img = storage.child("event/" + id).get_url(None)
-    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img}
+    urls = []
+    for line in url:
+        url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+        found_urls = re.findall(url_pattern, line)
+        urls.extend(found_urls)
+    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img,'urls':urls}
 
-    return render_template('./admin/activity-details-admin.html', data=data)
+    return render_template('./admin/activity-details-admin.html', data=data,urls=urls)
 
 
 # เพิ่มข่าวกิจกรรม
@@ -2290,35 +2315,30 @@ def interact_search():
 @app.route('/interact_search_report', methods=['POST'])
 def interact_search_report():
     if request.method == 'POST':
-        allThread = db.child('Thread').get().val()
+        allTReport = db.child('Report').get().val()
         bword = db.child('BWord').get().val()
         word = request.form.get('search_txt')
         data = []
-        if not allThread is None:
-            for i in allThread:
-                foundThread = db.child('Thread').child(i).get().val()
-                detail = foundThread['detail'].split('\r\n')
-                title = functools.reduce(
-                    lambda a, b:
-                    a.replace(b["Keyword"], b["Replace"])
-                    , bword
-                    , foundThread['title']
-                )
-                if foundThread['owner'] == session['id']:
+        if not allTReport is None:
+            for i in allTReport:
+                foundReport = db.child('Report').child(i).get().val()
+                dt = 'สร้างเมื่อ ' + foundReport['date'] + ' ' + foundReport['time']
+                if foundReport['owner'] == session['id']:
                     isYour = 1
                 else:
                     isYour = 0
-                dt = 'สร้างเมื่อ ' + foundThread['date'] + ' ' + foundThread['time']
-                newsDict = {'id': i, 'title': title, 'detail': detail, 'owner': foundThread['owner'],
-                            'length': len(detail), 'datetime': dt, 'date': foundThread['date'],
-                            'time': foundThread['time'], 'isYour': isYour}
-                if foundThread['title'].find(word) >= 0:
+                newsDict = {'id': i, 'tid': foundReport['id'], 'title': foundReport['title'],
+                            'detail': foundReport['rq'],
+                            'owner': foundReport['owner'], 'datetime': dt, 'rq': foundReport['rq'],
+                            'date': foundReport['date'], 'time': foundReport['time'], 'isYour': isYour}
+                if foundReport['title'].find(word) >= 0:
                     data.append(newsDict)
         else:
             newDict = {'id': 't000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
             data.append(newDict)
         if len(data) > 1:
             sort(data)
+        print(data)
         if session['status'] == 1:
             return render_template('./admin/report-admin.html', data=data, by='', length=len(data))
         elif session['status'] == 0:
@@ -2813,6 +2833,7 @@ def success_news():
         currentID = 'n' + format.format(id)
         date, time, date7 = getDateTime()
         detail = request.form.get('detail')
+        url = request.form.get('url')
         del_date = request.form.get('date')
         groups = request.form.get('branch')
         date_closed = request.form.get('dateclosed')
@@ -2837,8 +2858,7 @@ def success_news():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': detail, 'group': groups, 'owner': session['id'],
-                   'date_post': postDate,
-                   'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
+                   'date_post': postDate,'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('News').child(currentID).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2861,6 +2881,7 @@ def edit_news():
     if request.method == 'POST':
         date, time, date7 = getDateTime()
         detail = request.form.get('detail')
+        url = request.form.get('url')
         del_date = request.form.get('date')
         date_closed = request.form.get('dateclosed')
         chx = request.form.get('isOn')
@@ -2885,7 +2906,7 @@ def edit_news():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': detail, 'date_post': postDate, 'group': groups,
-                   'owner': session['id'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
+                   'owner': session['id'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('News').child(request.form.get('id')).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2916,6 +2937,7 @@ def success_event():
         date, time, date7 = getDateTime()
         del_date = request.form.get('date')
         date_closed = request.form.get('dateclosed')
+        url = request.form.get('url')
         if date_closed == '' or date_closed is None:
             dateclosed = ''
         else:
@@ -2939,7 +2961,7 @@ def success_event():
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': request.form.get('detail'), 'group': groups,
                    'owner': session['id'],
-                   'date_post': postDate, 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
+                   'date_post': postDate, 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('Event').child(currentID).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2963,6 +2985,7 @@ def edit_event():
     if request.method == 'POST':
         date, time, date7 = getDateTime()
         detail = request.form.get('detail')
+        url = request.form.get('url')
         del_date = request.form.get('date')
         if del_date == '':
             delDate = ''
@@ -2987,7 +3010,7 @@ def edit_event():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newEvent = {'title': request.form.get('title'), 'date_post': postDate, 'group': groups, 'owner': session['id'],'detail': detail,
-                    'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed}
+                    'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('Event').child(request.form.get('id')).set(newEvent)
         file = request.files['file']
         if not file.filename == "":

@@ -65,7 +65,7 @@
         <form method="POST" action="/add_reply">
         <input type="hidden" name="id" value="{{data.id}}">
         <textarea style="resize:none;" name="detail" maxlength="650" rows="7" id="txt" class="form-control"
-                  placeholder="แสดงความคิดเห็นของท่าน ....."></textarea>
+                  placeholder="แสดงความคิดเห็นของท่าน ....." required></textarea>
           <br>
         <div class="mar-top clearfix">
           <div class="form-group">
@@ -89,8 +89,9 @@
                               <form class="login100-form validate-form" method="post" action="/add_report">
                                 <input type="hidden" name="real_title" value="{{data.real_title}}">
                                 <input type="hidden" name="id" value="{{data.id}}">
-                                <input type="text" class="form-control" name="rq" placeholder="กรุณากรอกรายละเอียด" required>
+                                <input type="text" class="form-control" name="rq" maxlength="100" placeholder="กรุณากรอกรายละเอียด" required>
                                 <br>
+                                <h3 style="font-size: 15px;color: #ff0000b3;" >(ใส่ตัวอักษรได้ไม่เกิน100ตัวอักษร)</h3>
                                 <input type="submit" class="btn-sm btn btn-primary" value="ยืนยัน">
                                 <a type="button" class="btn-sm btn btn1" href="#">ยกเลิก</a>
                               </form>
