@@ -22,7 +22,12 @@
         <div class="collapse navbar-collapse text-center" id=navigation>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
-          <a class="nav-link" href="index.html">หน้าแรก</a>
+          <a class="nav-link" href="/index.html">หน้าแรก</a>
+          {% if status == 1 %}
+          <a class="nav-link" href="/interact-admin.html">ย้อนกลับ</a>
+          {% else %}
+          <a class="nav-link" href="/interact.html">ย้อนกลับ</a>
+          {% endif %}
           <a href="/logout" class="btn btn-sm btn-primary ml-lg-4">ออกจากระบบ</a>
         </div>
       </nav>
@@ -56,7 +61,11 @@
             </div>
               <br>
               <button type="submit" class="btn btn-primary">บันทึก</button>
+              {% if status == 1 %}
               <button type="button" onclick="location.href='/interact-admin.html';" class="btn btn-security">ยกเลิก</button>
+              {% else %}
+              <button type="button" onclick="location.href='/interact.html';" class="btn btn-security">ยกเลิก</button>
+              {% endif %}
             </form>
 
           </div>

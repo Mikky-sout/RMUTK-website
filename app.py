@@ -508,7 +508,7 @@ def publish_details_admin(id: str):
         found_urls = re.findall(url_pattern, line)
         urls.extend(found_urls)
     data = {'title': foundNews['title'], 'detail': detail, 'length': len(detail), 'image': img, 'urls':urls}
-    return render_template('./admin/publish-details-admin.html', data=data,urls=urls)
+    return render_template('./admin/publish-details-admin.html', data=data,urls=urls,my_id=session['id'])
 
 
 # หน้าเพิ่มข่าวแอดมิน
@@ -533,6 +533,7 @@ def interact_details(id: str):
     thread = db.child('Thread').child(id).get().val()
     bword = db.child('BWord').get().val()
     replyList = []
+
     if 'Reply' in thread:
         allReply = thread['Reply']
         for i in allReply:
@@ -556,7 +557,6 @@ def interact_details(id: str):
         , thread['detail']
     )
     img2 = storage.child("thread/" + id).get_url(None)
-
     display_detail = detail.split('\r\n')
     detail = thread['detail'].split('\r\n')
     allUser = db.child('User').get().val()
@@ -570,8 +570,13 @@ def interact_details(id: str):
         , bword
         , thread['title']
     )
+    aa = []
+    if str(session['status']) == "1":
+        aa = "admin"
+    elif str(session['status']) == "0":
+        aa = "user"
     data = {'id': id, 'title': title, 'detail': display_detail, 'real_title':thread['title'],'real_detail':detail,'owner': thread['owner'], 'length': len(detail),
-            'name': user['name'], 'email': user['email'], 'date': thread['date'], 'time': thread['time'], 'img2': img2}
+            'name': user['name'], 'email': user['email'], 'date': thread['date'], 'time': thread['time'], 'img2': img2,'aa':aa}
     return render_template('interact_details.html', data=data, reply=replyList,my_status=session['status'])
 
 
@@ -1329,13 +1334,18 @@ def activity_details_admin(id: str):
     url = foundEvent['url'].split('\r\n')
     img = storage.child("event/" + id).get_url(None)
     urls = []
+    aa = []
+    if session['status'] == 1:
+        aa = "ผู้ดูแล"
+    else:
+        aa = "นักศึกษา"
     for line in url:
         url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
         found_urls = re.findall(url_pattern, line)
         urls.extend(found_urls)
-    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img,'urls':urls}
-
-    return render_template('./admin/activity-details-admin.html', data=data,urls=urls)
+    data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img,'urls':urls,'aa':aa}
+    print(session['status'])
+    return render_template('./admin/activity-details-admin.html', data=data,urls=urls,my_id=session['id'])
 
 
 # เพิ่มข่าวกิจกรรม
@@ -1345,15 +1355,14 @@ def add_activity_admin():
     data = []
     for i in BDl:
         data.append(i)
-    return render_template('./admin/add-activity-admin.html', data=data, my_group=session['branch'],
-                           my_id=session['id'], min=getNextDay())
+    return render_template('./admin/add-activity-admin.html', data=data, my_group=session['branch'],my_id=session['id'], min=getNextDay())
 
 
 # เพิ่มกระทู้
 
 @app.route('/add-interact-admin.html')
 def add_interact_admin():
-    return render_template('./admin/add-interact-admin.html')
+    return render_template('./admin/add-interact-admin.html',status=session['status'])
 
 
 @app.route('/edit-interact-admin.html/<string:id>')
@@ -1365,7 +1374,7 @@ def edit_interact_admin(id: str):
     for i in BDl:
         DBranch.append(i)
     return render_template('./admin/edit-interact-admin.html', data=data, id=id, my_group=session['branch'],
-                           my_id=session['id'], DBranch=DBranch, img=img)
+                           my_id=session['id'], DBranch=DBranch, img=img,status=session['status'])
 
 
 # วันเดือนปี
@@ -2867,9 +2876,10 @@ def success_news():
             os.remove('temp_news_pic')
         else:
             storage.child('news').child(currentID).put('logo.jpg')
-        task = AppContextThread(target=send_mail('แจ้งเตือน ' + request.form.get('title'), request.form.get('detail')))
-        task.start()
-        task.join()
+        if chx == "open":
+                task = AppContextThread(target=send_mail('RMUTK NEWS ' + request.form.get('title'), request.form.get('detail')))
+                task.start()
+                task.join()
         if session['id'] == "admin":
             return redirect(url_for('publish_admin_2'))
         elif session['id'] != "admin":
@@ -2970,9 +2980,10 @@ def success_event():
             os.remove('temp_event_pic')
         else:
             storage.child('event').child(currentID).put('logo.jpg')
-        task = AppContextThread(target=send_mail('แจ้งเตือน ' + request.form.get('title'), request.form.get('detail')))
-        task.start()
-        task.join()
+        if chx == "open":
+            task = AppContextThread(target=send_mail('RMUTK NEWS กิจกรรม ' + request.form.get('title'), request.form.get('detail')))
+            task.start()
+            task.join()
         if session['id'] == "admin":
             return redirect(url_for('activity_admin_2'))
         elif session['id'] != "admin":

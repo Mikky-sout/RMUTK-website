@@ -21,6 +21,11 @@
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
           <a class="nav-link" href="/index-admin.html">หน้าแรก</a>
+          {% if my_id != 'admin' %}
+          <a class="nav-link" href="/publish-admin.html">ย้อนกลับ</a>
+          {% else %}
+          <a class="nav-link" href="/publishAD1-admin.html">ย้อนกลับ</a>
+          {% endif %}
           <a href="/logout" class="btn btn-sm btn-primary ml-lg-4">ออกจากระบบ</a>
         </div>
       </nav>

@@ -60,6 +60,11 @@
               {% endif %}
           <a href="add-interact-admin.html" class=" nav-link btn btn-sm btn-primary ">เพิ่มข้อมูล</a>
         </nav>
+        {% if length == 0 %}
+            <div class="card3">
+                <h4>ไม่พบข้อมูลจากการค้นหา</h4>
+            </div>
+          {% else %}
         {% for thread in data %}
         {% if thread.id != 't000' %}
           <div onclick="location.href='/interact_details.html/{{thread.id}}'" class="card3">
@@ -81,10 +86,8 @@
                 {% else %}
                 {% endif %}
             {% endif %}
-
-
-
                 {% endfor %}
+            {% endif %}
 
 
       </div>
