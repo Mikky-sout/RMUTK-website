@@ -15,9 +15,12 @@
     }
 
     .xbar{
-        margin-top: -213px;
+        margin-top: -154px;
     margin-right: 26px;
     font-size: 50px;
+    }
+    .name11{
+    margin: 18px 7px -62px;
     }
   </style>
 
@@ -66,21 +69,17 @@
           {% else %}
         {% for report in data %}
         {% if report.id != 'rp000' %}
-          <div onclick="location.href='/interact_details.html/{{report.tid}}'" class="card3">
+          <div onclick="location.href='/report-details-admin.html/{{report.tid}}'" class="card3">
         {% else %}
             <div class="card3">
         {% endif %}
               <div id="txt" style="margin-top: -38px;">
                 {% if report.id != 'rp000' %}
-                  <div class="name">
-                    <h2>{{report.title}}</h2>
-                    <p>({{report.datetime}})</p>
+                  <div class="name11">
+                    <h4 >{{report.title}}</h4>
+                    <p style="font-size: 15px;">({{report.datetime}})</p>
                     <br><br>
-                    <div style="position: absolute;bottom: 10px; font-size: 14px;color:red;font-weight:bold;">รายงานเรื่อง : {{report.rq}}
-                      <br>
-                      ผู้ที่รายงาน {{report.owner}}
-                      <br>
-                      รายงานเวลา {{report.date}}</div>
+                    <div style="position: absolute;bottom: 10px; font-size: 18px;color:red;font-weight:bold;right: 103px;">จำนวนที่ถูกรายงาน : {{report.tid_count}} ครั้ง</div>
                   </div>
                 {% else %}
                   <div class="name">

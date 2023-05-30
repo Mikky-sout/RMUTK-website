@@ -659,6 +659,38 @@ def interact_custom(id: str):
         data.append(newDict)
     return render_template('interact.html', data=data, by=session['name'])
 
+@app.route('/report-details-admin.html/<string:id>')
+def report_details_admin(id: str):
+    thread = db.child('Thread').child(id).get().val()
+    img2 = storage.child("thread/" + id).get_url(None)
+    allReport = db.child('Report').get().val()
+    detail = thread['detail'].split('\r\n')
+    allUser = db.child('User').get().val()
+    data1=[]
+    if not allReport is None:
+        for i in allReport:
+            foundReport = db.child('Report').child(i).get().val()
+            if foundReport['id'] == id :
+                newsDict = {'id': i, 'tid': foundReport['id'], 'title': foundReport['title'], 'detail': foundReport['rq'],
+                'owner': foundReport['owner'], 'rq': foundReport['rq'], 'date': foundReport['date'], 'time': foundReport[
+                    'time']}
+                data1.append(newsDict)
+    if not allUser is None:
+        user = allUser[thread['owner']]
+    else:
+        user = {'name': 'n/a', 'email': 'n/a'}
+
+    aa = []
+    if str(session['status']) == "1":
+        aa = "admin"
+    elif str(session['status']) == "0":
+        aa = "user"
+    data = {'id': id, 'title': thread['title'], 'detail': thread['detail'],
+            'owner': thread['owner'], 'length': len(detail),
+            'name': user['name'], 'email': user['email'], 'date': thread['date'], 'time': thread['time'], 'img2': img2,
+            'aa': aa}
+    print(data1)
+    return render_template('./admin/report-details-admin.html', data=data,my_status=session['status'],reportlist = data1)
 
 @app.route('/add_reply', methods=['POST'])
 def add_reply():
@@ -1500,17 +1532,28 @@ def report_admin():
     allTReport  = db.child('Report').get().val()
     bword = db.child('BWord').get().val()
     data = []
-    if not allTReport  is None:
-        for i in allTReport :
-            foundReport  = db.child('Report').child(i).get().val()
-            dt = 'สร้างเมื่อ ' + foundReport ['date'] + ' ' + foundReport['time']
-            if foundReport ['owner'] == session['id']:
+    if not allTReport is None:
+        unique_tids = set()
+        tid_counts = {}
+        for i in allTReport:
+            foundReport = db.child('Report').child(i).get().val()
+            dt = 'สร้างเมื่อ ' + foundReport['date'] + ' ' + foundReport['time']
+            if foundReport['owner'] == session['id']:
                 isYour = 1
             else:
                 isYour = 0
-            newsDict = {'id': i, 'tid': foundReport ['id'], 'title': foundReport ['title'], 'detail': foundReport ['rq'],
-                        'owner': foundReport ['owner'], 'datetime': dt,'rq':foundReport ['rq'],'date': foundReport ['date'], 'time': foundReport ['time'], 'isYour': isYour}
-            data.append(newsDict)
+            newsDict = {'id': i, 'tid': foundReport['id'], 'title': foundReport['title'], 'detail': foundReport['rq'],
+                        'owner': foundReport['owner'], 'datetime': dt, 'rq': foundReport['rq'],
+                        'date': foundReport['date'],
+                        'time': foundReport['time'], 'isYour': isYour}
+
+            if newsDict['tid'] not in unique_tids:
+                data.append(newsDict)
+                unique_tids.add(newsDict['tid'])
+
+            tid_counts[newsDict['tid']] = tid_counts.get(newsDict['tid'], 0) + 1
+        for newsDict in data:
+            newsDict['tid_count'] = tid_counts[newsDict['tid']]
     else:
         newDict = {'id': 'rp000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
@@ -1519,6 +1562,7 @@ def report_admin():
     if data == []:
         newDict = {'id': 'rp000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
+    print(data)
     return render_template('./admin/report-admin.html', data=data, by='', length=len(data), my_id=session['id'])
 
 
@@ -2866,7 +2910,7 @@ def success_news():
         else:
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
-        newNews = {'title': request.form.get('title'), 'detail': detail, 'group': groups, 'owner': session['id'],
+        newNews = {'title': request.form.get('title'), 'detail': detail, 'group': groups, 'owner': session['name'],
                    'date_post': postDate,'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('News').child(currentID).set(newNews)
         file = request.files['file']
@@ -2916,7 +2960,7 @@ def edit_news():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': detail, 'date_post': postDate, 'group': groups,
-                   'owner': session['id'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
+                   'owner': session['name'], 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('News').child(request.form.get('id')).set(newNews)
         file = request.files['file']
         if not file.filename == "":
@@ -2970,7 +3014,7 @@ def success_event():
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
         newNews = {'title': request.form.get('title'), 'detail': request.form.get('detail'), 'group': groups,
-                   'owner': session['id'],
+                   'owner': session['name'],
                    'date_post': postDate, 'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('Event').child(currentID).set(newNews)
         file = request.files['file']
@@ -3020,7 +3064,7 @@ def edit_event():
         else:
             postDate = post_date.replace('-', '/')
             postDate = getDateFormated(postDate)
-        newEvent = {'title': request.form.get('title'), 'date_post': postDate, 'group': groups, 'owner': session['id'],'detail': detail,
+        newEvent = {'title': request.form.get('title'), 'date_post': postDate, 'group': groups, 'owner': session['name'],'detail': detail,
                     'date': date, 'time': time, 'date_del': delDate, 'isOn': isOn,'date_closed':dateclosed,'url':url}
         db.child('Event').child(request.form.get('id')).set(newEvent)
         file = request.files['file']

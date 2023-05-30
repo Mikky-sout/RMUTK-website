@@ -37,7 +37,7 @@
     <div class="container">
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-          <h2 class="section-title1">ข่าวประชาสัมพันธ์ คณะ</h2>
+          <h2 class="section-title1">ข่าวประชาสัมพันธ์ คณะ{{my_group}}</h2>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
 
@@ -127,7 +127,7 @@
                           {% endfor %}</p>
                         {% endif %}
                         {% if news.id != "n000" %}
-                            <div style="position: absolute;bottom: 10px; font-size: 12px;">คณะ {{news.group}} <br> สร้างเมื่อ {{news.date}}<br>เวลา {{news.time}}</div>
+                            <div style="position: absolute;bottom: 10px; font-size: 12px;">โพสต์โดย {{news.owner}} <br> คณะ {{news.group}} <br> สร้างเมื่อ {{news.date}}<br>เวลา {{news.time}}</div>
 
 
                             </div>

@@ -36,7 +36,7 @@
     <div class="container">
       <div class="align-items-center">
         <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-          <h2 class="section-title1">ข่าวกิจกรรม คณะ</h2>
+          <h2 class="section-title1">ข่าวกิจกรรม คณะ{{my_group}}</h2>
           <ul class="navbar-nav mx-auto align-items-center">
           </ul>
                 <input type="button" class="br nav-link btn btn-sm btn-primary" onclick="location.href='/activity2.html';" value="ข่าวมหาวิทยาลัย"/>
@@ -94,7 +94,7 @@
 
             {% endif %}
 
-                             <div style="position: absolute;bottom: 10px; font-size: 12px;">คณะ {{event.group}} <br> สร้างเมื่อ {{event.date}}<br>เวลา {{event.time}}</div>
+                             <div style="position: absolute;bottom: 10px; font-size: 12px;">โพสต์โดย {{event.owner}} <br> คณะ {{event.group}} <br> สร้างเมื่อ {{event.date}}<br>เวลา {{event.time}}</div>
           </div>
               </div>
               <div class="col-lg-4 content-item" style="width: 300px;margin: 1px auto;">

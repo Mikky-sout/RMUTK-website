@@ -44,12 +44,13 @@
 
         <div class="card4">
           <div class="infos">
-            <h1 class="text" style="font-size: 12px;">โดย : {{data.name}} #{{data.owner}} วันที่ : {{data.date}} เวลา :{{data.time}}</h1>
+            <h1 class="text" style="font-size: 12px;">โดย : {{data.name}} #{{data.owner}} วันที่ : {{data.date}} เวลา : {{data.time}}</h1>
             <p class="text">
             {% for i in range(data.length) %}
-            {% if i < data.length %} {{data.detail[i]}}<br>
+            {% if i < data.length %}
+              {{data.detail}}<br>
               {% else %}
-              {{data.detail[i]}}
+              {{data.detail}}
               {% endif %}
               {% endfor %}</p>
             <center>
@@ -57,77 +58,27 @@
             </center>
           </div>
         </div>
+        <h4 style="left: 175px;position: relative;">รายงานที่โดนแจ้ง</h4>
+
+        {% for report in reportlist %}
+        {% if report.id != 'rp000' %}
+        <div class="card32">
+          <p style="font-size: 18px;font-weight: bold; line-height: 2.2rem;">รายงานโดย : {{report.owner}}
+          <br>
+        รายงานเรื่อง : {{report.detail}}
+          <br>
+          วันที่รายงาน : {{report.date}}
+          <br>
+          เวลา : {{report.time}}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
       </div>
     </div>
   </section>
 
 
-  <div class="container bootdey">
-    <div class="col-md-12 bootstrap snippets">
-    <div class="panel1">
-      <div class="panel-body">
-        <form method="POST" action="/add_reply">
-        <input type="hidden" name="id" value="{{data.id}}">
-        <textarea style="resize:none;" name="detail" maxlength="650" rows="7" id="txt" class="form-control"
-                  placeholder="แสดงความคิดเห็นของท่าน ....." required></textarea>
-          <br>
-        <div class="mar-top clearfix">
-          <div class="form-group">
-
-          <button class="btn btn-lg btn-primary btn-p" type="submit" style="position: inherit;"> โพสต์ </button>
-        </div>
-          </form>
-        </div>
-      </div>
-    </div>
-<div class="box55">
-                  {% if my_status == 0 %}
-                    <a class="button55" href="#divOne">รายงานกระทู้</a>
-                  {% endif %}
-                </div>
-                <div class="overlay55" id="divOne">
-                    <div class="wrapper55">
-                        <h22>ส่งข้อความเพื่อรายงานกระทู้</h22><a class="close" href="#">&times;</a>
-                        <div class="content55">
-                            <div class="container55">
-                              <form class="login100-form validate-form" method="post" action="/add_report">
-                                <input type="hidden" name="real_title" value="{{data.real_title}}">
-                                <input type="hidden" name="id" value="{{data.id}}">
-                                <input type="text" class="form-control" name="rq" maxlength="100" placeholder="กรุณากรอกรายละเอียด" required>
-                                <br>
-                                <h3 style="font-size: 15px;color: #ff0000b3;" >(ใส่ตัวอักษรได้ไม่เกิน100ตัวอักษร)</h3>
-                                <input type="submit" class="btn-sm btn btn-primary" value="ยืนยัน">
-                                <a type="button" class="btn-sm btn btn1" href="#">ยกเลิก</a>
-                              </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-    {% for rep in reply %}
-    <div class="panel1">
-        <div class="panel-body">
-        <div class="media-block">
-          <a class="media-left"><img class="img-circle img-sm" alt="Profile Picture" src="{{rep.img1}}"></a>
-          <div class="media-body">
-            <div class="mar-btm">
-              <a href="#" class="green text-semibold media-heading box-inline">{{rep.name}} #{{rep.owner}}</a>
-              <p class="text-muted text-sm"><i class="fa fa-mobile fa-lg"></i> ({{rep.date}} {{rep.time}})</p>
-            </div>
-            <p class="text">{% for i in range(rep.length) %}
-                {% if i < rep.length %}
-                  {{rep.detail[i]}}<br>
-                {% else %}
-                  {{rep.detail[i]}}
-                {% endif %}
-              {% endfor %}</p>
-            <hr>
-          </div>
-          </div>
-            <hr>
-          </div>
-      {% endfor %}
-        </div>
+           </div>
       </div>
 
 
@@ -247,6 +198,49 @@ input[type=text], select, textarea {
 	width: 100%;
 	padding: 12px;
 	}
+	.card3::after,
+  .card3 img {
+  border-radius: 50%;
+  }
+
+  .card32,
+  .stats {
+  display: flex;
+  }
+
+  .card32 {
+  padding: 15px 2rem 10px;
+  border-radius: 15px;
+  background-color: rgba(255, 255, 255, .5);
+  max-width: 2000px;
+  box-shadow: 0 0 3px rgba(0, 0, 0, .30);
+  margin: 28px 180px 15px;
+  position: relative;
+  transform-style: preserve-3d;
+  overflow: hidden;
+  }
+  .card32::before,
+  .card32::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  }
+  .card32::before {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #FFF;
+  border-radius: 10px;
+  top: -.7rem;
+  left: -.7rem;
+  }
+  .card32::after {
+    height: 31rem;
+    width: 26rem;
+
+    top: 6rem;
+    right: -14rem;
+    box-shadow: 2rem 6rem 0 -3rem #fff;
+  }
 </style>
   <footer>
     <div class="container"><br><br><br><br><br><br><br><br><br><br><br><br>
