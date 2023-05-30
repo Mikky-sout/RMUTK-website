@@ -689,7 +689,7 @@ def report_details_admin(id: str):
             'owner': thread['owner'], 'length': len(detail),
             'name': user['name'], 'email': user['email'], 'date': thread['date'], 'time': thread['time'], 'img2': img2,
             'aa': aa}
-    print(data1)
+
     return render_template('./admin/report-details-admin.html', data=data,my_status=session['status'],reportlist = data1)
 
 @app.route('/add_reply', methods=['POST'])
@@ -955,7 +955,7 @@ def activity():
     if len(data) > 1:
         sort(data)
     if data == []:
-        newDict = {'id': 'e00', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+        newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
         data.append(newDict)
     return render_template('activity.html', data=data, by='', my_id=session['id'], my_group=session['branch'])
 
@@ -1376,7 +1376,7 @@ def activity_details_admin(id: str):
         found_urls = re.findall(url_pattern, line)
         urls.extend(found_urls)
     data = {'title': foundEvent['title'], 'detail': detail, 'length': len(detail), 'image': img,'urls':urls,'aa':aa}
-    print(session['status'])
+
     return render_template('./admin/activity-details-admin.html', data=data,urls=urls,my_id=session['id'])
 
 
@@ -1562,7 +1562,6 @@ def report_admin():
     if data == []:
         newDict = {'id': 'rp000', 'title': 'ยังไม่มีกระทู้', 'detail': ''}
         data.append(newDict)
-    print(data)
     return render_template('./admin/report-admin.html', data=data, by='', length=len(data), my_id=session['id'])
 
 
@@ -2034,10 +2033,13 @@ def activity_search():
                         if foundEvent['group'] == session['branch']:
                             data.append(newsDict)
         else:
-            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวประชาสัมพันธ์', 'detail': ''}
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
             data.append(newDict)
         # if len(data) > 1:
         #     sort(data)
+        if data == []:
+            newDict = {'id': 'e000', 'title': 'ยังไม่มีข่าวกิจกรรม', 'detail': ''}
+            data.append(newDict)
         if session['status'] == 0:
             return render_template('activity.html', data=data, length=len(data))
         elif session['status'] == 1:
@@ -2391,7 +2393,6 @@ def interact_search_report():
             data.append(newDict)
         if len(data) > 1:
             sort(data)
-        print(data)
         if session['status'] == 1:
             return render_template('./admin/report-admin.html', data=data, by='', length=len(data))
         elif session['status'] == 0:

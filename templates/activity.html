@@ -106,6 +106,13 @@
 
         </div>
                             {% endif %}
+                            {% if event.id == "e000" %}
+                <div class="course">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="card-block">
+                                <div class="name"> <h2>{{event.title}}</h2> </div>
+                {% endif %}
         {% endfor %}
         {% endif %}
 
